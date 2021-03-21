@@ -2,7 +2,7 @@
 
 **A lean Node.js client for TRIAS APIs. 🚌**
 
-This client aims to be a layer of abstraction for the TRIAS API, so that developers do not need to deal with the implementation of TRIAS themselves. It achieves this by only providing only a small subset of the capabilities of TRIAS and utilizing the [Friendly Public Transport Format](https://github.com/public-transport/friendly-public-transport-format).
+This client aims to be a layer of abstraction for the TRIAS specification, so that developers do not need to deal with the actual implementation themselves. It achieves this by providing only a small subset of the capabilities of TRIAS and utilizing the [Friendly Public Transport Format](https://github.com/public-transport/friendly-public-transport-format).
 
 The TRIAS Client currently only supports two basic functionalities:
 - Searching for stops (either using a name or coordinates).
