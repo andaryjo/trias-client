@@ -1,6 +1,6 @@
 # TRIAS Client
 
-**A lean Node.js client for TRIAS APIs. 🚌**
+**A lean Node.js client for TRIAS APIs. 🚀**
 
 This client aims to be a layer of abstraction for the TRIAS specification, so that developers do not need to deal with the actual implementation themselves. It achieves this by providing only a small subset of the capabilities of TRIAS and utilizing the [Friendly Public Transport Format](https://github.com/public-transport/friendly-public-transport-format).
 
@@ -10,7 +10,7 @@ The TRIAS Client currently only supports two basic functionalities:
 
 ## What is TRIAS?
 
-TRIAS stands for "Travellor Realtime Information and Advisory Standard" and is a standardized specification developed by the [VDV](https://de.wikipedia.org/wiki/Verband_Deutscher_Verkehrsunternehmen) for public transport APIs. TRIAS offers a wide-range list of functionalities, including station / location search, realtime departures, navigation, ticket price calculation, malfunction reportings, and so on. Here is a list of all public transport providers that provide a TRIAS interface.
+TRIAS stands for "Travellor Realtime Information and Advisory Standard" and is a standardized specification developed by the [VDV](https://de.wikipedia.org/wiki/Verband_Deutscher_Verkehrsunternehmen) for public transport APIs. TRIAS offers a wide-range list of functionalities, including station / location search, realtime departures, navigation, ticket price calculation, malfunction reportings, and so on. [Here](https://github.com/andaryjo/trias-client/blob/v1/PROVIDERS.md) is a list of all public transport providers that provide a TRIAS interface.
 
 Currently, there aren't a lot of helpful resources on TRIAS. Most providers only publish a few implementation examples and refer to the documentation: [VDV 431-2 EKAP-Schnittstellenbeschreibung](https://www.vdv.de/ip-kom-oev.aspx)
 
@@ -50,3 +50,5 @@ You might wonder why this even matters if you can just continue to use the exist
 And this is where TRIAS becomes relevant, as the APIs built on it are public (not open, as they still require authentication, but public). And while some providers are a bit more strict regarding the use and display of the data, in general all of the APIs have fair terms of use and come with realistic usage quotas.
 
 TRIAS is XML-based (urgh) and comes with a quite high request payload, but it's easy to understand and well documented.
+
+**Made with :two_hearts: in Heidelberg.**
