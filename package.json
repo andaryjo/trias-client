@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/andaryjo/trias-client#readme",
   "devDependencies": {
+    "friendly-public-transport-format": "^1.2.1",
     "typescript": "^4.2.3"
   }
 }
