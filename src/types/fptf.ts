@@ -27,16 +27,19 @@ interface FPTFLine {
     type: string;
     id: string;
     line: string;
-    mode: string;
+    mode: FPTFMode;
+    subMode?: FPTFSubmode // Not included in FPTF
 }
 
 interface FPTFStopover {
     type: string;
     stop: string;
-    arrival: string;
+    line: FPTFLine; // Not included in FPTF
+    direction: string; // Not included in FPTF
+    arrival?: string;
     arrivalDelay?: number;
     arrivalPlatform?: string;
-    departure: string;
+    departure?: string;
     departureDelay?: number;
     departurePlatform?: string;
 }
@@ -48,6 +51,9 @@ interface FPTFJourney {
 }
 
 interface FPTFLeg {
+    line: FPTFLine; // Somehow not included in FPTF
+    mode: FPTFMode;
+    subMode: FPTFSubmode;
     origin: string;
     destination: string;
     departure: string;
@@ -56,11 +62,10 @@ interface FPTFLeg {
     arrivalDelay?: number;
     arrivalPlatform: string;
     stopovers?: Array<FPTFStopover>;
-    mode: FPTFMode;
-    subMode: FPTFSubmode;
+    
 }
 
-enum FPTFMode {
+const enum FPTFMode {
     AIRCRAFT = "aircraft",
     BICYCLE = "bicycle",
     BUS = "bus",
@@ -74,7 +79,7 @@ enum FPTFMode {
 }
 
 // To be defined in FPTF
-enum FPTFSubmode { 
+const enum FPTFSubmode { 
     METRO = "metro",
     RAIL = "rail",
     TRAM = "tram",

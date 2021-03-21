@@ -1,13 +1,12 @@
-const fs = require("fs");
-const xmldom = require('xmldom');
-const request = require("request");
-
-const PAYLOAD_NAME = require("../xml/TRIAS_LIR_NAME");
-const PAYLOAD_POS = require("../xml/TRIAS_LIR_POS");
+const PAYLOAD_LIR_NAME = require("../xml/TRIAS_LIR_NAME");
+const PAYLOAD_LIR_POS = require("../xml/TRIAS_LIR_POS");
 
 class TRIASStopsHandler {
-
     url; requestorRef;
+
+    // This is my first TypeScript project. Don't judge me please!
+    request = require("request");
+    xmldom = require('xmldom');
 
     constructor(url: string, requestorRef: string) {
         this.url = url;
@@ -20,12 +19,12 @@ class TRIASStopsHandler {
             var maxResults = options.maxResults ? options.maxResults : 10;
             var payload; 
 
-            if (options.name) payload = PAYLOAD_NAME.replace("$QUERY", options.name).replace("$MAXRESULTS", maxResults.toString()).replace("$TOKEN", this.requestorRef);
-            else if (options.latitude && options.longitude && options.radius) payload = PAYLOAD_POS.replace("$LATITUDE", options.latitude.toString()).replace("$LONGITUDE", options.longitude.toString()).replace("$RADIUS", options.radius.toString()).replace("$MAXRESULTS", maxResults.toString()).replace("$TOKEN", this.requestorRef);
+            if (options.name) payload = PAYLOAD_LIR_NAME.replace("$QUERY", options.name).replace("$MAXRESULTS", maxResults.toString()).replace("$TOKEN", this.requestorRef);
+            else if (options.latitude && options.longitude && options.radius) payload = PAYLOAD_LIR_POS.replace("$LATITUDE", options.latitude.toString()).replace("$LONGITUDE", options.longitude.toString()).replace("$RADIUS", options.radius.toString()).replace("$MAXRESULTS", maxResults.toString()).replace("$TOKEN", this.requestorRef);
 
             var headers = { 'Content-Type': 'application/xml' };
 
-            request.post({ url: this.url, body: payload, headers: headers }, (err: any, res: any, body: any) => {
+            this.request.post({ url: this.url, body: payload, headers: headers }, (err: any, res: any, body: any) => {
 
                 if (err) {
                     reject(err);
@@ -37,13 +36,13 @@ class TRIASStopsHandler {
                     return;
                 }
 
-                body = sanitizeBody(body);
+                body = this.sanitizeBody(body);
 
                 var stops: Array<FPTFStop> = [];
 
                 try {
 
-                    var doc = new xmldom.DOMParser().parseFromString(body);
+                    var doc = new this.xmldom.DOMParser().parseFromString(body);
                     var locationsList = doc.getElementsByTagName("LocationResult");
 
                     for (var i = 0; i < locationsList.length; i++) {
@@ -89,13 +88,13 @@ class TRIASStopsHandler {
             });
         });
     }
-}
 
-// Some providers include XML tags like "<trias:Result>"
-// This function removes them from the body before parsing
-function sanitizeBody(body: string) {
-    if (body.includes("trias:")) body.replace(/trias:/g, '');
-    return body;
+    // Some providers include XML tags like "<trias:Result>"
+    // This function removes them from the body before parsing
+    sanitizeBody(body: string) {
+        if (body.includes("trias:")) body.replace(/trias:/g, '');
+        return body;
+    }
 }
 
 module.exports = TRIASStopsHandler;
