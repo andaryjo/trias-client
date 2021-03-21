@@ -1,7 +1,11 @@
 const trias = require("../lib/index.js");
 
-var client = trias.getClient({url: "test", requestorRef: "test"});
+var client = trias.getClient({url: "http://trias.vrn.de:8080/Middleware/Data/trias", requestorRef: "test"});
 
-console.log(client.getStops({
-    name: "test"
-}));
+client.getStops({
+    name: "bismarckplatz"
+}).then((result) => {
+    console.log(result);
+}).catch((error) => {
+    console.log(error);
+});

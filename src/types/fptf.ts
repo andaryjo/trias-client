@@ -7,26 +7,30 @@
  * See https://gitlab.com/andary/abfahrt-core/-/blob/2.0/swagger.yaml
 **/
 
-interface stop {
+interface FPTFStop {
     type: string;
     id: string;
     name: string;
-    location?: location,
+    location?: FPTFLocation,
 }
 
-interface location {
+interface FPTFLocation {
     type: string;
-    id: number;
+    name?: string;
+    address?: string;
+    longitude?: number;
+    latitude?: number;
+    altitude?: number;
 }
 
-interface line {
+interface FPTFLine {
     type: string;
     id: string;
     line: string;
     mode: string;
 }
 
-interface stopover {
+interface FPTFStopover {
     type: string;
     stop: string;
     arrival: string;
@@ -37,13 +41,13 @@ interface stopover {
     departurePlatform?: string;
 }
 
-interface journey {
+interface FPTFJourney {
     type: string;
     id: string;
-    legs: Array<leg>;
+    legs: Array<FPTFLeg>;
 }
 
-interface leg {
+interface FPTFLeg {
     origin: string;
     destination: string;
     departure: string;
@@ -51,12 +55,12 @@ interface leg {
     arrival: string;
     arrivalDelay?: number;
     arrivalPlatform: string;
-    stopovers?: Array<stopover>;
-    mode: mode;
-    subMode: submode;
+    stopovers?: Array<FPTFStopover>;
+    mode: FPTFMode;
+    subMode: FPTFSubmode;
 }
 
-enum mode {
+enum FPTFMode {
     AIRCRAFT = "aircraft",
     BICYCLE = "bicycle",
     BUS = "bus",
@@ -70,7 +74,7 @@ enum mode {
 }
 
 // To be defined in FPTF
-enum submode { 
+enum FPTFSubmode { 
     METRO = "metro",
     RAIL = "rail",
     TRAM = "tram",
