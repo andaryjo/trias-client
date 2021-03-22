@@ -6,6 +6,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    steps:
       - run: echo "yay"
   publish:
     runs-on: ubuntu-latest
