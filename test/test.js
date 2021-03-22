@@ -1,6 +1,8 @@
 const trias = require("../lib/index.js");
 
-var client = trias.getClient({url: "http://trias.vrn.de:8080/Middleware/Data/trias", requestorRef: "test"});
+const conf = require("./config.json");
+
+var client = trias.getClient({url: conf.url, requestorRef: conf.ref});
 
 client.getStops({
     name: "bismarckplatz"
@@ -10,7 +12,7 @@ client.getStops({
     client.getDepartures({
         id: result.stops[0].id
     }).then((result) => {
-        console.log(result);
+        console.log(result.departures[0]);
     })
 
 }).catch((error) => {
