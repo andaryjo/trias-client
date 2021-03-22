@@ -15,7 +15,7 @@ The TRIAS Client currently only supports two basic functionalities:
 Install the package:
 
 ```
-npm install <tbd>
+npm install trias-client
 ```
 
 Following script creates a TRIAS client, searches for a station and fetches the departures for the first result:
@@ -50,7 +50,5 @@ Compared to [HAFAS](https://github.com/public-transport/hafas-client), TRIAS isn
 You might wonder why this even matters if you can just continue to use the existing HAFAS interfaces. The biggest difference is that these HAFAS interfaces are not supposed to be used by the public and public transport providers might even prohibit to use them. So if you want to develop and publish a project that uses public transport data, you might want to have some kind of agreement with the data provider, that reduces operational and legal risk for both you and the provider.
 
 And this is where TRIAS becomes relevant, as the APIs built on it are public (not open, as they still require authentication, but public). And while some providers are a bit more strict regarding the use and display of the data, in general all of the APIs have fair terms of use and come with realistic usage quotas.
-
-TRIAS is XML-based (urgh) and comes with a quite high request payload, but it's easy to understand and well documented.
 
 **Made with :two_hearts: in Heidelberg.**
