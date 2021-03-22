@@ -2,21 +2,17 @@
 
 **A lean Node.js client for TRIAS APIs. 🚀**
 
-This client aims to be a layer of abstraction for the TRIAS specification, so that developers do not need to deal with the actual implementation themselves. It achieves this by providing only a small subset of the capabilities of TRIAS and utilizing the [Friendly Public Transport Format](https://github.com/public-transport/friendly-public-transport-format).
+This client aims to be an easy-to use and lightweight implementation for the Public Transport TRIAS specification. It achieves that by providing only a small subset of the capabilities of TRIAS and utilizing the [Friendly Public Transport Format](https://github.com/public-transport/friendly-public-transport-format).
 
 The TRIAS Client currently only supports two basic functionalities:
 - Searching for stops (either using a name or coordinates).
 - Fetching departures for a stop.
 
-## What is TRIAS?
-
-TRIAS stands for "Travellor Realtime Information and Advisory Standard" and is a standardized specification developed by the [VDV](https://de.wikipedia.org/wiki/Verband_Deutscher_Verkehrsunternehmen) for public transport APIs. TRIAS offers a wide-range list of functionalities, including station / location search, realtime departures, navigation, ticket price calculation, malfunction reportings, and so on. [Here](https://github.com/andaryjo/trias-client/blob/v1/PROVIDERS.md) is a list of all public transport providers that provide a TRIAS interface.
-
-Currently, there aren't a lot of helpful resources on TRIAS. Most providers only publish a few implementation examples and refer to the documentation: [VDV 431-2 EKAP-Schnittstellenbeschreibung](https://www.vdv.de/ip-kom-oev.aspx)
-
 ## Usage
 
-To install it, use:
+> Please note that you will need an API endpoint and an API key or requestor reference key issued to you by the data provider.
+
+Install the package:
 
 ```
 npm install <tbd>
@@ -28,7 +24,7 @@ Following script creates a TRIAS client, searches for a station and fetches the 
 const trias = require("trias-client");
 
 var client = trias.getClient({
-    url: "place the url of the TRIAS provider here",
+    url: "place the url of the TRIAS API here",
     requestorRef: "place your requestor ref here"
 });
 
@@ -40,6 +36,12 @@ var departuresResult = await client.getDepartures({
     id: stopsResult.stops[0].id
 });
 ```
+
+## What is TRIAS?
+
+TRIAS stands for "Travellor Realtime Information and Advisory Standard" and is a standardized specification developed by the [VDV](https://de.wikipedia.org/wiki/Verband_Deutscher_Verkehrsunternehmen) for public transport APIs. TRIAS offers a wide-range list of functionalities, including station / location search, realtime departures, navigation, ticket price calculation, malfunction reportings, and so on. [Here](https://github.com/andaryjo/trias-client/blob/v1/PROVIDERS.md) is a list of all public transport providers that provide a TRIAS interface.
+
+Currently, there aren't a lot of helpful resources on TRIAS. Most providers only publish a few implementation examples and refer to the documentation: [VDV 431-2 EKAP-Schnittstellenbeschreibung](https://www.vdv.de/ip-kom-oev.aspx)
 
 ## Why TRIAS?
 
