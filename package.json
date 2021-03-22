@@ -5,6 +5,7 @@
     "main": "lib/index.js",
     "scripts": {
         "build": "tsc",
+        "format": "prettier --write \"src/**/*.ts\"",
         "lint": "tslint -p tsconfig.json",
         "test": "tsc && node test/test.js"
     },
