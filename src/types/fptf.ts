@@ -5,7 +5,7 @@
  *
  * For reference, this data model mostly aligns with the one of Abfahrt Core, which has been used in TRIAS use cases for a long time
  * See https://gitlab.com/andary/abfahrt-core/-/blob/2.0/swagger.yaml
- **/
+ */
 
 interface FPTFStop {
     type: string;
@@ -47,7 +47,7 @@ interface FPTFStopover {
 interface FPTFJourney {
     type: string;
     id: string;
-    legs: Array<FPTFLeg>;
+    legs: FPTFLeg[];
 }
 
 interface FPTFLeg {
@@ -61,7 +61,7 @@ interface FPTFLeg {
     arrival: string;
     arrivalDelay?: number;
     arrivalPlatform: string;
-    stopovers?: Array<FPTFStopover>;
+    stopovers?: FPTFStopover[];
 }
 
 const enum FPTFMode {
