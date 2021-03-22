@@ -3,11 +3,11 @@ const TRIASStopsHandler = require("./trias/TRIASStopsHandler");
 
 export const getClient = (options: ClientOptions) => {
     return new TRIASClient(options);
-}
+};
 
 class TRIASClient {
-
-    departuresHandler; stopsHandler;
+    departuresHandler;
+    stopsHandler;
 
     constructor(options: ClientOptions) {
         this.departuresHandler = new TRIASDeparturesHandler(options.url, options.requestorRef);
