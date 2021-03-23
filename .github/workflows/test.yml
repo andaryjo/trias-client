@@ -1,0 +1,28 @@
+name: test and lint
+on:
+  push:
+    branches:
+    - "*"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10
+      - run: npm install
+      - run: npm run test
+        env:
+          TEST_TRIAS_URL: ${{ secrets.TEST_TRIAS_URL }}
+          TEST_TRIAS_REF: ${{ secrets.TEST_TRIAS_REF }}
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10
+      - run: npm install
+      - run: npm run lint
+
