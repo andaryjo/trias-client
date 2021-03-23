@@ -1,6 +1,7 @@
 interface ClientOptions {
     url: string;
     requestorRef: string;
+    headers: {[key: string]: string};
 }
 
 interface DeparturesRequestOptions {

@@ -7,10 +7,12 @@ import { TRIAS_LIR_POS } from "../xml/TRIAS_LIR_POS";
 export class TRIASStopsHandler {
     url;
     requestorRef;
+    headers;
 
-    constructor(url: string, requestorRef: string) {
-        this.url = url;
-        this.requestorRef = requestorRef;
+    constructor(options: ClientOptions) {
+        this.url = options.url;
+        this.requestorRef = options.requestorRef;
+        this.headers = options.headers;
     }
 
     getStops(options: StopsRequestOptions) {
@@ -29,9 +31,9 @@ export class TRIASStopsHandler {
                     .replace("$MAXRESULTS", maxResults.toString())
                     .replace("$TOKEN", this.requestorRef);
 
-            const headers = { "Content-Type": "application/xml" };
+            this.headers["Content-Type"] = "application/xml";
 
-            request.post({ url: this.url, body: payload, headers }, (err: any, res: any, body: any) => {
+            request.post({ url: this.url, body: payload, headers: this.headers }, (err: any, res: any, body: any) => {
 
                 if (err) {
                     reject(err);

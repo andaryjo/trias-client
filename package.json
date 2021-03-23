@@ -1,7 +1,7 @@
 {
     "name": "trias-client",
-    "version": "0.1.0",
-    "description": "Lean Node.js client for Public Transport TRIAS APIs.",
+    "version": "0.1.1",
+    "description": "Lean Node.js client for public transport TRIAS APIs.",
     "main": "lib/index.js",
     "scripts": {
         "build": "tsc",
@@ -20,7 +20,7 @@
         "type": "git",
         "url": "git+https://github.com/andaryjo/trias-client.git"
     },
-    "author": "",
+    "author": "Andary",
     "license": "ISC",
     "bugs": {
         "url": "https://github.com/andaryjo/trias-client/issues"
