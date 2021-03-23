@@ -3,9 +3,9 @@ interface Result {
 }
 
 interface DeparturesResult extends Result {
-    departures?: Array<FPTFStopover>;
+    departures?: FPTFStopover[];
 }
 
 interface StopsResult extends Result {
-    stops?: Array<FPTFStop>;
+    stops?: FPTFStop[];
 }

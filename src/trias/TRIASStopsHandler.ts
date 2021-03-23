@@ -1,13 +1,12 @@
-const PAYLOAD_LIR_NAME = require("../xml/TRIAS_LIR_NAME");
-const PAYLOAD_LIR_POS = require("../xml/TRIAS_LIR_POS");
+import * as request from "request";
+import * as xmldom from "xmldom";
 
-class TRIASStopsHandler {
+import { TRIAS_LIR_NAME } from "../xml/TRIAS_LIR_NAME";
+import { TRIAS_LIR_POS } from "../xml/TRIAS_LIR_POS";
+
+export class TRIASStopsHandler {
     url;
     requestorRef;
-
-    // This is my first TypeScript project. Don't judge me please!
-    request = require("request");
-    xmldom = require("xmldom");
 
     constructor(url: string, requestorRef: string) {
         this.url = url;
@@ -16,78 +15,77 @@ class TRIASStopsHandler {
 
     getStops(options: StopsRequestOptions) {
         return new Promise((resolve, reject) => {
-            var maxResults = options.maxResults ? options.maxResults : 10;
-            var payload;
+            const maxResults = options.maxResults ? options.maxResults : 10;
+            let payload;
 
             if (options.name)
-                payload = PAYLOAD_LIR_NAME.replace("$QUERY", options.name)
+                payload = TRIAS_LIR_NAME.replace("$QUERY", options.name)
                     .replace("$MAXRESULTS", maxResults.toString())
                     .replace("$TOKEN", this.requestorRef);
             else if (options.latitude && options.longitude && options.radius)
-                payload = PAYLOAD_LIR_POS.replace("$LATITUDE", options.latitude.toString())
+                payload = TRIAS_LIR_POS.replace("$LATITUDE", options.latitude.toString())
                     .replace("$LONGITUDE", options.longitude.toString())
                     .replace("$RADIUS", options.radius.toString())
                     .replace("$MAXRESULTS", maxResults.toString())
                     .replace("$TOKEN", this.requestorRef);
 
-            var headers = { "Content-Type": "application/xml" };
+            const headers = { "Content-Type": "application/xml" };
 
-            this.request.post({ url: this.url, body: payload, headers: headers }, (err: any, res: any, body: any) => {
+            request.post({ url: this.url, body: payload, headers }, (err: any, res: any, body: any) => {
+
                 if (err) {
                     reject(err);
                     return;
                 }
 
-                if (res.statusCode != 200) {
+                if (res.statusCode !== 200) {
                     reject("API returned status code " + res.statusCode);
                     return;
                 }
 
                 body = this.sanitizeBody(body);
 
-                var stops: Array<FPTFStop> = [];
+                const stops: FPTFStop[] = [];
 
                 try {
-                    var doc = new this.xmldom.DOMParser().parseFromString(body);
-                    var locationsList = doc.getElementsByTagName("LocationResult");
+                    const doc = new xmldom.DOMParser().parseFromString(body);
+                    const locationsList = doc.getElementsByTagName("LocationResult");
 
-                    for (var i = 0; i < locationsList.length; i++) {
-                        var locationElement = locationsList.item(i);
-                        var id = locationElement.getElementsByTagName("StopPointRef").item(0).childNodes[0].nodeValue;
-                        var latitude = parseFloat(
-                            locationElement.getElementsByTagName("Latitude").item(0).childNodes[0].nodeValue,
-                        );
-                        var longitude = parseFloat(
-                            locationElement.getElementsByTagName("Longitude").item(0).childNodes[0].nodeValue,
-                        );
+                    for (let i = 0; i < locationsList.length; i++) {
 
-                        var stopPointNameElement = locationElement.getElementsByTagName("StopPointName").item(0);
-                        var stationName = stopPointNameElement.getElementsByTagName("Text").item(0).childNodes[0]
-                            .nodeValue;
-
-                        var locationNameElement = locationElement.getElementsByTagName("LocationName").item(0);
-                        var locationName = locationNameElement.getElementsByTagName("Text").item(0).childNodes[0]
-                            .nodeValue;
-
-                        if (!stationName.includes(locationName)) stationName = locationName + " " + stationName;
-
-                        var stop: FPTFStop = {
+                        const stop: FPTFStop = {
                             type: "stop",
-                            id: id,
-                            name: stationName,
-                            location: {
-                                type: "location",
-                                latitude: latitude,
-                                longitude: longitude,
-                            },
+                            id: "",
+                            name: "",
                         };
+
+                        const locationElement = locationsList.item(i);
+
+                        const id = locationElement?.getElementsByTagName("StopPointRef")?.item(0)?.childNodes[0].nodeValue;
+                        if (id) stop.id = id;
+
+                        const latitude = locationElement?.getElementsByTagName("Latitude")?.item(0)?.childNodes[0]?.nodeValue;
+                        const longitude = locationElement?.getElementsByTagName("Longitude")?.item(0)?.childNodes[0]?.nodeValue;
+                        if (latitude && longitude) {
+                            stop.location = {
+                                type: "location",
+                                latitude: parseFloat(latitude),
+                                longitude: parseFloat(longitude)
+                            };
+                        }
+
+                        const stationName = locationElement?.getElementsByTagName("StopPointName")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
+                        const locationName = locationElement?.getElementsByTagName("LocationName")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
+
+                        if (locationName && stationName && !stationName.includes(locationName)) stop.name = locationName + " " + stationName;
+                        else if (stationName) stop.name = stationName;
 
                         stops.push(stop);
                     }
 
-                    var result: StopsResult = {
+                    const result: StopsResult = {
                         success: true,
-                        stops: stops,
+                        stops,
                     };
 
                     resolve(result);
@@ -106,5 +104,3 @@ class TRIASStopsHandler {
         return body;
     }
 }
-
-module.exports = TRIASStopsHandler;

@@ -1,12 +1,12 @@
-const PAYLOAD_SER = require("../xml/TRIAS_SER");
+import * as moment from "moment-timezone";
+import * as request from "request";
+import * as xmldom from "xmldom";
 
-class TRIASDeparturesHandler {
+import { TRIAS_SER } from "../xml/TRIAS_SER";
+
+export class TRIASDeparturesHandler {
     url;
     requestorRef;
-
-    moment = require("moment-timezone");
-    request = require("request");
-    xmldom = require("xmldom");
 
     constructor(url: string, requestorRef: string) {
         this.url = url;
@@ -15,139 +15,126 @@ class TRIASDeparturesHandler {
 
     getDepartures(options: DeparturesRequestOptions) {
         return new Promise((resolve, reject) => {
-            var maxResults = options.maxResults ? options.maxResults : 20;
+            const maxResults = options.maxResults ? options.maxResults : 20;
 
-            var time;
-            if (options.time) time = this.moment(options.time).tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss");
-            else time = this.moment().tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss");
+            let time;
+            if (options.time) time = moment(options.time).tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss");
+            else time = moment().tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss");
 
-            var payload = PAYLOAD_SER.replace("$STATIONID", options.id)
+            const payload = TRIAS_SER.replace("$STATIONID", options.id)
                 .replace("$TIME", time)
-                .replace("$MAXRESULTS", maxResults)
+                .replace("$MAXRESULTS", maxResults.toString())
                 .replace("$TOKEN", this.requestorRef);
-            var headers = { "Content-Type": "application/xml" };
+            const headers = { "Content-Type": "application/xml" };
 
-            this.request.post({ url: this.url, body: payload, headers: headers }, (err: any, res: any, body: any) => {
+            request.post({ url: this.url, body: payload, headers }, (err: any, res: any, body: any) => {
                 if (err) {
                     reject(err);
                     return;
                 }
 
-                if (res.statusCode != 200) {
+                if (res.statusCode !== 200) {
                     reject("API returned status code " + res.statusCode);
                     return;
                 }
 
                 body = this.sanitizeBody(body);
 
-                var ticker = [];
-                var departures: Array<FPTFStopover> = [];
+                const ticker = [];
+                const departures: FPTFStopover[] = [];
 
                 try {
-                    var doc = new this.xmldom.DOMParser().parseFromString(body);
-                    var situationsList = doc.getElementsByTagName("PtSituation");
-                    for (var i = 0; i < situationsList.length; i++) {
-                        var situationElement = situationsList.item(i);
-                        var summary = situationElement.getElementsByTagName("Summary").item(0).childNodes[0].nodeValue;
-                        var startTime = situationElement.getElementsByTagName("StartTime").item(0).childNodes[0]
-                            .nodeValue;
-                        var endTime = situationElement.getElementsByTagName("EndTime").item(0).childNodes[0].nodeValue;
-                        var now = this.moment().tz("Europe/Berlin").unix();
-                        if (now > startTime && now < endTime) {
-                            if (summary) ticker.push(summary);
-                        }
+
+                    const doc = new xmldom.DOMParser().parseFromString(body);
+                    const situationsList = doc.getElementsByTagName("PtSituation");
+
+                    for (let i = 0; i < situationsList.length; i++) {
+
+                        const situationElement = situationsList.item(i);
+                        const summary = situationElement?.getElementsByTagName("Summary").item(0)?.childNodes[0].nodeValue;
+                        if (!summary) continue;
+                        const startTime = situationElement?.getElementsByTagName("StartTime").item(0)?.childNodes[0].nodeValue;
+                        const endTime = situationElement?.getElementsByTagName("EndTime").item(0)?.childNodes[0].nodeValue;
+
+                        const now = moment().unix();
+                        if (now > moment(startTime).unix() && now < moment(endTime).unix()) ticker.push(summary);
                     }
 
-                    var departuresList = doc.getElementsByTagName("StopEvent");
-                    for (var i = 0; i < departuresList.length; i++) {
-                        var departureElement = departuresList.item(i);
+                    const departuresList = doc.getElementsByTagName("StopEvent");
 
-                        var pubLineNameTextElement = departureElement
-                            .getElementsByTagName("PublishedLineName")
-                            .item(0)
-                            .getElementsByTagName("Text")
-                            .item(0);
-                        if (pubLineNameTextElement.childNodes.length > 0)
-                            var line = pubLineNameTextElement.childNodes[0].nodeValue;
-                        else
-                            var line = departureElement
-                                .getElementsByTagName("Name")
-                                .item(0)
-                                .getElementsByTagName("Text")
-                                .item(0).childNodes[0].nodeValue;
+                    for (let i = 0; i < departuresList.length; i++) {
 
-                        var direction = departureElement
-                            .getElementsByTagName("DestinationText")
-                            .item(0)
-                            .getElementsByTagName("Text")
-                            .item(0).childNodes[0].nodeValue;
-                        var time = this.parseResponseTime(
-                            departureElement.getElementsByTagName("TimetabledTime").item(0).childNodes[0].nodeValue,
-                        );
-
-                        var estimatedTimeList = departureElement.getElementsByTagName("EstimatedTime");
-                        if (estimatedTimeList.length > 0)
-                            var realtime = estimatedTimeList.item(0).childNodes[0].nodeValue;
-
-                        var delay = -1;
-                        if (realtime) delay = this.moment(realtime).unix() - this.moment(time).unix();
-
-                        var plannedBayList = departureElement.getElementsByTagName("PlannedBay");
-                        if (plannedBayList.length > 0)
-                            var platform = plannedBayList.item(0).getElementsByTagName("Text").item(0).childNodes[0]
-                                .nodeValue;
-
-                        var type = departureElement.getElementsByTagName("PtMode").item(0).childNodes[0].nodeValue;
-                        var mode;
-                        var subMode;
-                        if (type == "bus") mode = FPTFMode.BUS;
-                        else if (type == "tram") {
-                            mode = FPTFMode.TRAIN;
-                            subMode = FPTFSubmode.TRAM;
-                        } else if (type == "metro") {
-                            mode = FPTFMode.TRAIN;
-                            subMode = FPTFSubmode.METRO;
-                        } else if (type == "rail") {
-                            mode = FPTFMode.TRAIN;
-                            subMode = FPTFSubmode.RAIL;
-                        } else mode = FPTFMode.UNKNOWN;
-
-                        var departure: FPTFStopover = {
+                        const departure: FPTFStopover = {
                             type: "stopover",
                             stop: options.id,
                             line: {
                                 type: "line",
-                                id: line,
-                                line: line,
-                                mode: mode,
+                                id: "",
+                                line: "",
+                                mode: FPTFMode.UNKNOWN,
                             },
-                            direction: direction,
-                            departure: time,
+                            direction: "",
+                            departure: "",
                         };
 
-                        if (delay >= 0) departure.departureDelay = delay;
-                        if (platform) departure.departurePlatform = platform;
-                        if (subMode) departure.line.subMode = subMode;
+                        const departureElement = departuresList.item(i);
 
+                        let line;
+                        const pubLineNameTextElement = departureElement?.getElementsByTagName("PublishedLineName").item(0)?.getElementsByTagName("Text").item(0);
+                        if (pubLineNameTextElement?.childNodes?.length) line = pubLineNameTextElement.childNodes[0].nodeValue;
+                        else line = departureElement?.getElementsByTagName("Name")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
+                        if (line) {
+                            departure.line.id = line;
+                            departure.line.line = line;
+                        }
+
+                        const direction = departureElement?.getElementsByTagName("DestinationText")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
+                        if (direction) departure.direction = direction;
+
+                        const timetabledTime = departureElement?.getElementsByTagName("TimetabledTime")?.item(0)?.childNodes[0].nodeValue;
+                        if (timetabledTime) departure.departure = this.parseResponseTime(timetabledTime);
+
+                        const estimatedTime = departureElement?.getElementsByTagName("EstimatedTime")?.item(0)?.childNodes[0].nodeValue;
+                        if (estimatedTime) departure.departureDelay = moment(estimatedTime).unix() - moment(timetabledTime).unix();
+
+                        const plannedBay = departureElement?.getElementsByTagName("PlannedBay")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
+                        if (plannedBay) departure.departurePlatform = plannedBay;
+
+                        const type = departureElement?.getElementsByTagName("PtMode")?.item(0)?.childNodes[0].nodeValue;
+                        if (type === "bus") {
+                            departure.line.mode = FPTFMode.BUS;
+                        } else if (type === "tram") {
+                            departure.line.mode = FPTFMode.TRAIN;
+                            departure.line.subMode = FPTFSubmode.TRAM;
+                        } else if (type === "metro") {
+                            departure.line.mode = FPTFMode.TRAIN;
+                            departure.line.subMode = FPTFSubmode.METRO;
+                        } else if (type === "rail") {
+                            departure.line.mode = FPTFMode.TRAIN;
+                            departure.line.subMode = FPTFSubmode.RAIL;
+                        }
+                        
                         departures.push(departure);
                     }
 
-                    var result: DeparturesResult = {
+                    const result: DeparturesResult = {
                         success: true,
-                        departures: departures,
+                        departures,
                     };
 
                     resolve(result);
+
                 } catch (error) {
                     reject("The client encountered an error during parsing: " + error);
                     return;
                 }
+
             });
         });
     }
 
     parseResponseTime(time: string) {
-        return this.moment(time).tz("Europe/Berlin").format();
+        return moment(time).tz("Europe/Berlin").format();
     }
 
     // Some providers include XML tags like "<trias:Result>"
@@ -157,5 +144,3 @@ class TRIASDeparturesHandler {
         return body;
     }
 }
-
-module.exports = TRIASDeparturesHandler;

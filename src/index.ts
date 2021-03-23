@@ -1,5 +1,5 @@
-const TRIASDeparturesHandler = require("./trias/TRIASDeparturesHandler");
-const TRIASStopsHandler = require("./trias/TRIASStopsHandler");
+import { TRIASDeparturesHandler } from "./trias/TRIASDeparturesHandler";
+import { TRIASStopsHandler } from "./trias/TRIASStopsHandler";
 
 export const getClient = (options: ClientOptions) => {
     return new TRIASClient(options);
