@@ -7,10 +7,12 @@ import { TRIAS_SER } from "../xml/TRIAS_SER";
 export class TRIASDeparturesHandler {
     url;
     requestorRef;
+    headers;
 
-    constructor(url: string, requestorRef: string) {
-        this.url = url;
-        this.requestorRef = requestorRef;
+    constructor(options: ClientOptions) {
+        this.url = options.url;
+        this.requestorRef = options.requestorRef;
+        this.headers = options.headers;
     }
 
     getDepartures(options: DeparturesRequestOptions) {
@@ -25,9 +27,10 @@ export class TRIASDeparturesHandler {
                 .replace("$TIME", time)
                 .replace("$MAXRESULTS", maxResults.toString())
                 .replace("$TOKEN", this.requestorRef);
-            const headers = { "Content-Type": "application/xml" };
 
-            request.post({ url: this.url, body: payload, headers }, (err: any, res: any, body: any) => {
+            this.headers["Content-Type"] = "application/xml";
+
+            request.post({ url: this.url, body: payload, headers: this.headers }, (err: any, res: any, body: any) => {
                 if (err) {
                     reject(err);
                     return;
