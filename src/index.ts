@@ -10,8 +10,11 @@ class TRIASClient {
     stopsHandler;
 
     constructor(options: ClientOptions) {
-        this.departuresHandler = new TRIASDeparturesHandler(options);
-        this.stopsHandler = new TRIASStopsHandler(options);
+        if (!options.requestorRef) options.requestorRef = "";
+        if (!options.headers) options.headers = {};
+
+        this.departuresHandler = new TRIASDeparturesHandler(options.url, options.requestorRef, options.headers);
+        this.stopsHandler = new TRIASStopsHandler(options.url, options.requestorRef, options.headers);
     }
 
     getDepartures(options: DeparturesRequestOptions) {

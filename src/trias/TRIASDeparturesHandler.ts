@@ -5,14 +5,14 @@ import * as xmldom from "xmldom";
 import { TRIAS_SER } from "../xml/TRIAS_SER";
 
 export class TRIASDeparturesHandler {
-    url;
-    requestorRef;
-    headers;
+    url: string;
+    requestorRef: string;
+    headers: {[key: string]: string};
 
-    constructor(options: ClientOptions) {
-        this.url = options.url;
-        this.requestorRef = options.requestorRef;
-        this.headers = options.headers;
+    constructor(url: string, requestorRef: string, headers: {[key: string]: string}) {
+        this.url = url;
+        this.requestorRef = requestorRef;
+        this.headers = headers;
     }
 
     getDepartures(options: DeparturesRequestOptions) {

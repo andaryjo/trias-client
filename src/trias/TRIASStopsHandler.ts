@@ -5,14 +5,14 @@ import { TRIAS_LIR_NAME } from "../xml/TRIAS_LIR_NAME";
 import { TRIAS_LIR_POS } from "../xml/TRIAS_LIR_POS";
 
 export class TRIASStopsHandler {
-    url;
-    requestorRef;
-    headers;
+    url: string;
+    requestorRef: string;
+    headers: {[key: string]: string};
 
-    constructor(options: ClientOptions) {
-        this.url = options.url;
-        this.requestorRef = options.requestorRef;
-        this.headers = options.headers;
+    constructor(url: string, requestorRef: string, headers: {[key: string]: string}) {
+        this.url = url;
+        this.requestorRef = requestorRef;
+        this.headers = headers;
     }
 
     getStops(options: StopsRequestOptions) {
