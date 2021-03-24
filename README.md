@@ -39,7 +39,7 @@ var departuresResult = await client.getDepartures({
 
 ## What is TRIAS?
 
-TRIAS stands for "**T**ravellor **R**ealtime **I**nformation and **A**dvisory **S**tandard", has been developed in scope of the research and standardisation project for public transport "IP-KOM-ÖV" and was then introduced in 2014 as a standardized specification by the VDV ([Verband Deutscher Verkehrsunternehmen](https://de.wikipedia.org/wiki/Verband_Deutscher_Verkehrsunternehmen)). TRIAS offers a wide-range list of functionalities, including station / location search, realtime departures, navigation, ticket price calculation, malfunction reportings, and so on. [Here](https://github.com/andaryjo/trias-client/blob/v1/PROVIDERS.md) is a list of all public transport providers that provide a TRIAS interface.
+TRIAS stands for "**T**ravellor **R**ealtime **I**nformation and **A**dvisory **S**tandard", has been developed in scope of the research and standardisation project for public transport "IP-KOM-ÖV" and was then introduced in 2014 as a standardized specification by the VDV ([Verband Deutscher Verkehrsunternehmen](https://de.wikipedia.org/wiki/Verband_Deutscher_Verkehrsunternehmen)). TRIAS offers a wide-range list of functionalities, including station / location search, realtime departures, navigation, ticket price calculation, malfunction reportings, and so on. [Here](https://github.com/andaryjo/trias-client/blob/main/docs/PROVIDERS.md) is a list of all public transport providers that provide a TRIAS interface.
 
 Currently, there aren't a lot of helpful resources on TRIAS. Most providers only publish a few implementation examples and refer to the documentation: [VDV 431-2 EKAP-Schnittstellenbeschreibung](https://www.vdv.de/ip-kom-oev.aspx)
 
