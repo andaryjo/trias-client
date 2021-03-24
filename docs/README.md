@@ -20,11 +20,11 @@ This function returns a client that you can use to perform requests against a TR
 |---|---|---|---|---|---|
 | url | URL of the TRIAS API. | string | yes | none | `"https://provider.data/trias"` |
 | requestorRef | Requestor ref for the TRIAS API. | string | no | none | `"user123"` |
-| headers | Custom http headers for the requests to the TRIAS API. | Object | no | none | `{ "x-test-header": "myvalue" }` |
+| headers | Custom http headers for the requests to the TRIAS API. | Object | no | none | `{"x-test-header": "myvalue"}` |
 
 ## client.getStops(StopsRequestOptions options)
 
-This function returns a list of stops that fit the given search criteria. It requires `StopsRequestOptions` and will return a Promise which resolves into a `StopsResult`.
+This function returns a list of deparures for a given stop. It requires `StopsRequestOptions` and will return a Promise which resolves into a `StopsResult`.
 
 | Paramater | Description | Type | Required | Default | Example |
 |---|---|---|---|---|---|
