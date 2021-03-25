@@ -7,6 +7,7 @@ This client aims to be an easy to use and lightweight implementation for the pub
 The TRIAS Client currently only supports two basic functionalities:
 - Searching for stops (either using a name or coordinates).
 - Fetching departures for a stop.
+- Reading current ticker news for a stop.
 
 ## Usage
 
