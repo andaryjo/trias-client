@@ -24,7 +24,7 @@ This function returns a client that you can use to perform requests against a TR
 
 ## client.getStops(StopsRequestOptions options)
 
-This function returns a list of deparures for a given stop. It requires `StopsRequestOptions` and will return a Promise which resolves into a `StopsResult`.
+ This function returns a list of stops that fit the given search criteria. It requires `StopsRequestOptions` and will return a Promise which resolves into a `StopsResult`.
 
 | Paramater | Description | Type | Required | Default | Example |
 |---|---|---|---|---|---|
@@ -36,7 +36,7 @@ This function returns a list of deparures for a given stop. It requires `StopsRe
 
 ## client.getDepartures(DeparturesRequestOptions options)
 
-This function returns a list of stops that fit the given search criteria. It requires `DeparturesRequestOptions` and will return a Promise which resolves into a `DeparturesResult`.
+This function returns a list of departures and ticker information for a given stop. It requires `DeparturesRequestOptions` and will return a Promise which resolves into a `DeparturesResult`.
 
 | Paramater | Description | Type | Required | Default | Example |
 |---|---|---|---|---|---|
