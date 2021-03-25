@@ -45,11 +45,7 @@ export class TRIASStopsHandler {
                     return;
                 }
 
-
-
                 body = this.sanitizeBody(body);
-
-                console.log(body);
 
                 const stops: FPTFStop[] = [];
 

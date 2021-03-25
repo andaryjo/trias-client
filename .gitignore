@@ -1,4 +1,4 @@
 node_modules/
 lib/
 .envrc
-credentials.json
+test-credentials.json

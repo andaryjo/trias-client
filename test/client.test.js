@@ -1,32 +1,85 @@
 const trias = require("../lib/index.js");
 
+
+if (process.env.TEST_CREDENTIALS) var creds = JSON.parse(process.env.TEST_CREDENTIALS);
+else var creds = require("./test-credentials.json");
+
+
 describe("Test client", () => {
 
-    var client = trias.getClient({
-        url: process.env.TEST_TRIAS_URL, // URL for VRN Provider
-        requestorRef: process.env.TEST_TRIAS_REF, // Requestor ref for VRN Provider
-        headers: { "x-test-header": "test" }
-    });
+    it("Test for VRN", async () => {
 
-    it("should return stops by name", async () => {
+        const client = trias.getClient({
+            url: creds["VRN"].url,
+            requestorRef: creds["VRN"].token,
+        });
 
-        var stopsResult = await client.getStops({
+        const stopsResult = await client.getStops({
             name: "bismarckplatz"
         });
 
         expect(stopsResult.success).toEqual(true);
         expect(stopsResult.stops.length).toBeGreaterThanOrEqual(1);
         expect(stopsResult.stops[0].type).toEqual("stop");
-    });
 
-    it("should return departures", async () => {
-
-        var departuresResult = await client.getDepartures({
-            id: "de:08221:1146" // Stop ID of "Bismarckplatz"
+        const departuresResult = await client.getDepartures({
+            id: stopsResult.stops[0].id
         });
 
         expect(departuresResult.success).toEqual(true);
         expect(departuresResult.departures.length).toBeGreaterThanOrEqual(1);
         expect(departuresResult.departures[0].type).toEqual("stopover");
+
     });
+
+    it("Test for VRR", async () => {
+
+        const client = trias.getClient({
+            url: creds["VRR"].url,
+            requestorRef: creds["VRR"].token,
+        });
+
+        const stopsResult = await client.getStops({
+            name: "bahnhof"
+        });
+
+        expect(stopsResult.success).toEqual(true);
+        expect(stopsResult.stops.length).toBeGreaterThanOrEqual(1);
+        expect(stopsResult.stops[0].type).toEqual("stop");
+
+        const departuresResult = await client.getDepartures({
+            id: stopsResult.stops[0].id
+        });
+
+        expect(departuresResult.success).toEqual(true);
+        expect(departuresResult.departures.length).toBeGreaterThanOrEqual(1);
+        expect(departuresResult.departures[0].type).toEqual("stopover");
+
+    });
+
+    it("Test for KVV", async () => {
+
+        const client = trias.getClient({
+            url: creds["KVV"].url,
+            requestorRef: creds["KVV"].token,
+        });
+
+        const stopsResult = await client.getStops({
+            name: "karlsruhe"
+        });
+
+        expect(stopsResult.success).toEqual(true);
+        expect(stopsResult.stops.length).toBeGreaterThanOrEqual(1);
+        expect(stopsResult.stops[0].type).toEqual("stop");
+
+        const departuresResult = await client.getDepartures({
+            id: stopsResult.stops[0].id
+        });
+
+        expect(departuresResult.success).toEqual(true);
+        expect(departuresResult.departures.length).toBeGreaterThanOrEqual(1);
+        expect(departuresResult.departures[0].type).toEqual("stopover");
+
+    });
+
 });

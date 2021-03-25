@@ -7,9 +7,9 @@ import { TRIAS_SER } from "../xml/TRIAS_SER";
 export class TRIASDeparturesHandler {
     url: string;
     requestorRef: string;
-    headers: {[key: string]: string};
+    headers: { [key: string]: string };
 
-    constructor(url: string, requestorRef: string, headers: {[key: string]: string}) {
+    constructor(url: string, requestorRef: string, headers: { [key: string]: string }) {
         this.url = url;
         this.requestorRef = requestorRef;
         this.headers = headers;
@@ -116,7 +116,7 @@ export class TRIASDeparturesHandler {
                             departure.line.mode = FPTFMode.TRAIN;
                             departure.line.subMode = FPTFSubmode.RAIL;
                         }
-                        
+
                         departures.push(departure);
                     }
 
@@ -143,7 +143,7 @@ export class TRIASDeparturesHandler {
     // Some providers include XML tags like "<trias:Result>"
     // This function removes them from the body before parsing
     sanitizeBody(body: string) {
-        if (body.includes("trias:")) body.replace(/trias:/g, "");
+        if (body.includes("trias:")) body = body.replace(/trias:/g, "");
         return body;
     }
 }
