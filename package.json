@@ -2,7 +2,10 @@
     "name": "trias-client",
     "version": "0.1.1",
     "description": "Lean Node.js client for public transport TRIAS APIs.",
-    "keywords": ["public-transport", "trias"],
+    "keywords": [
+        "public-transport",
+        "trias"
+    ],
     "main": "lib/index.js",
     "scripts": {
         "build": "tsc",

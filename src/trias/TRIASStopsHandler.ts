@@ -7,9 +7,9 @@ import { TRIAS_LIR_POS } from "../xml/TRIAS_LIR_POS";
 export class TRIASStopsHandler {
     url: string;
     requestorRef: string;
-    headers: {[key: string]: string};
+    headers: { [key: string]: string };
 
-    constructor(url: string, requestorRef: string, headers: {[key: string]: string}) {
+    constructor(url: string, requestorRef: string, headers: { [key: string]: string }) {
         this.url = url;
         this.requestorRef = requestorRef;
         this.headers = headers;
@@ -45,7 +45,11 @@ export class TRIASStopsHandler {
                     return;
                 }
 
+
+
                 body = this.sanitizeBody(body);
+
+                console.log(body);
 
                 const stops: FPTFStop[] = [];
 
@@ -102,7 +106,7 @@ export class TRIASStopsHandler {
     // Some providers include XML tags like "<trias:Result>"
     // This function removes them from the body before parsing
     sanitizeBody(body: string) {
-        if (body.includes("trias:")) body.replace(/trias:/g, "");
+        if (body.includes("trias:")) body = body.replace(/trias:/g, "");
         return body;
     }
 }

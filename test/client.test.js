@@ -5,7 +5,7 @@ describe("Test client", () => {
     var client = trias.getClient({
         url: process.env.TEST_TRIAS_URL, // URL for VRN Provider
         requestorRef: process.env.TEST_TRIAS_REF, // Requestor ref for VRN Provider
-        headers: {"x-test-header": "test"}
+        headers: { "x-test-header": "test" }
     });
 
     it("should return stops by name", async () => {
