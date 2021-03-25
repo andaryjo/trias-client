@@ -123,6 +123,7 @@ export class TRIASDeparturesHandler {
                     const result: DeparturesResult = {
                         success: true,
                         departures,
+                        ticker
                     };
 
                     resolve(result);
