@@ -14,8 +14,7 @@ jobs:
       - run: npm install
       - run: npm run test # Test again to make sure no failing builds get published. Implicitly builds the package.
         env:
-          TEST_TRIAS_URL: ${{ secrets.TEST_TRIAS_URL }}
-          TEST_TRIAS_REF: ${{ secrets.TEST_TRIAS_REF }}
+          TEST_CREDENTIALS: ${{ secrets.TEST_CREDENTIALS }}
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
