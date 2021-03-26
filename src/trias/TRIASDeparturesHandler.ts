@@ -1,5 +1,5 @@
+import axios from 'axios';
 import * as moment from "moment-timezone";
-import * as request from "request";
 import * as xmldom from "xmldom";
 
 import { TRIAS_SER } from "../xml/TRIAS_SER";
@@ -28,20 +28,11 @@ export class TRIASDeparturesHandler {
                 .replace("$MAXRESULTS", maxResults.toString())
                 .replace("$TOKEN", this.requestorRef);
 
-            this.headers["Content-Type"] = "application/xml";
+            if (!this.headers["Content-Type"]) this.headers["Content-Type"] = "application/xml";
 
-            request.post({ url: this.url, body: payload, headers: this.headers }, (err: any, res: any, body: any) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
+            axios.post(this.url, payload, { headers: this.headers }).then((response) => {
 
-                if (res.statusCode !== 200) {
-                    reject("API returned status code " + res.statusCode);
-                    return;
-                }
-
-                body = this.sanitizeBody(body);
+                const body = this.sanitizeBody(response.data);
 
                 const ticker = [];
                 const departures: FPTFStopover[] = [];
@@ -133,6 +124,8 @@ export class TRIASDeparturesHandler {
                     return;
                 }
 
+            }).catch((error) => {
+                reject(error);
             });
         });
     }
