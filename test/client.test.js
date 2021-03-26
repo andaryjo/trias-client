@@ -1,9 +1,7 @@
 const trias = require("../lib/index.js");
 
-
 if (process.env.TEST_CREDENTIALS) var creds = JSON.parse(process.env.TEST_CREDENTIALS);
 else var creds = require("./test-credentials.json");
-
 
 describe("Test client", () => {
 
@@ -87,7 +85,7 @@ describe("Test client", () => {
         const client = trias.getClient({
             url: creds["VVO"].url,
             requestorRef: creds["VVO"].token,
-            headers: { "Content-Type": "text/xml"}
+            headers: { "Content-Type": "text/xml" }
         });
 
         const stopsResult = await client.getStops({
