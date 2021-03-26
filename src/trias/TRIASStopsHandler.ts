@@ -1,4 +1,4 @@
-import * as request from "request";
+import axios from 'axios';
 import * as xmldom from "xmldom";
 
 import { TRIAS_LIR_NAME } from "../xml/TRIAS_LIR_NAME";
@@ -31,21 +31,11 @@ export class TRIASStopsHandler {
                     .replace("$MAXRESULTS", maxResults.toString())
                     .replace("$TOKEN", this.requestorRef);
 
-            this.headers["Content-Type"] = "application/xml";
+            if (!this.headers["Content-Type"]) this.headers["Content-Type"] = "application/xml";
 
-            request.post({ url: this.url, body: payload, headers: this.headers }, (err: any, res: any, body: any) => {
+            axios.post(this.url, payload, { headers: this.headers }).then((response) => {
 
-                if (err) {
-                    reject(err);
-                    return;
-                }
-
-                if (res.statusCode !== 200) {
-                    reject("API returned status code " + res.statusCode);
-                    return;
-                }
-
-                body = this.sanitizeBody(body);
+                const body = this.sanitizeBody(response.data);
 
                 const stops: FPTFStop[] = [];
 
@@ -95,6 +85,8 @@ export class TRIASStopsHandler {
                     reject("The client encountered an error during parsing: " + error);
                     return;
                 }
+            }).catch((error) => {
+                reject(error);
             });
         });
     }
