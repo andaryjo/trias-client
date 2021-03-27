@@ -1,7 +1,18 @@
 # TRIAS Providers
 
-This is a list of public transport providers that provide a TRIAS interface.
-Most of them only implemented the more basic functionalities of the TRIAS specification:
+This is a list of public transport providers that provide a TRIAS API.
+Most of them **do not offer open APIs**, but require you to sign up with them.
+
+Additionally, not all providers offer the same functionalities. The TRIAS specification is *enormous* and most providers only implemented the basic stuff.
+
+
+
+## Karlsruher Verkehrsverbund
+
+:heavy_check_mark: Location Information :heavy_check_mark: Stop events :heavy_check_mark: Trips :heavy_multiplication_x: Contract required
+
+
+
 - [Karlsruher Verkehrsverbund](https://www.kvv.de/fahrplan/fahrplaene/open-data.html)
 - [Münchner Verkehrsverbund](https://www.mvv-muenchen.de/fahrplanauskunft/fuer-entwickler/index.html) (coming soon™)
 - [Nahverkehr Baden-Württemberg (bwegt)](https://www.mobidata-bw.de/dataset/trias)
