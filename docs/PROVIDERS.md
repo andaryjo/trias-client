@@ -26,11 +26,11 @@ Coming soon™.
 
 :heavy_check_mark: Location Information :heavy_check_mark: Stop events :heavy_check_mark: Trips :white_check_mark: No contract required
 
-:heavy_multiplication_x: Only 3000 requets per day
+:heavy_multiplication_x: Only 3000 requests per day
 
 ### [Verkehrsverbund Oberelbe](https://www.govdata.de/daten/-/details/api-fahrplanauskunft-vvo)
 
-:heavy_check_mark: Location Information :heavy_check_mark: Stop events :heavy_check_mark: Trips :heavy_check_mark: Open data
+:heavy_check_mark: Location Information :heavy_check_mark: Stop events :heavy_check_mark: Trips :heavy_check_mark: Open Data
 
 Use `http://efa.vvo-online.de:8080/std3/trias` as URL and `OpenService` as requestor ref. Make sure to set the `Content-Type` header to `text/xml` instead of `application/xml` (which is the default of `trias-client`).
 
