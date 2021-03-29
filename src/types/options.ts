@@ -17,3 +17,11 @@ interface StopsRequestOptions {
     radius?: number;
     maxResults?: number;
 }
+
+interface TripsRequestOptions {
+    origin: string;
+    destination: string;
+    departureTime?: string;
+    arrivalTime?: string;
+    maxResults?: number;
+}
