@@ -7,26 +7,34 @@ describe("Test providers", () => {
 
     const providers = [
         {
-            "name": "KVV",
-            "url": creds["KVV"].url,
-            "requestorRef": creds["KVV"].token,
-            "searchName": "karlsruhe"
+            name: "KVV",
+            url: creds["KVV"].url,
+            requestorRef: creds["KVV"].token,
+            searchName: "karlsruhe",
+            journeyOrigin: "de:08212:1103",
+            journeyDestination: "de:08212:90"
         }, {
-            "name": "VRN",
-            "url": creds["VRN"].url,
-            "requestorRef": creds["VRN"].token,
-            "searchName": "bismarckplatz"
+            name: "VRN",
+            url: creds["VRN"].url,
+            requestorRef: creds["VRN"].token,
+            searchName: "bismarckplatz",
+            journeyOrigin: "de:08222:2417",
+            journeyDestination: "de:08221:1146"
         }, {
-            "name": "VRR",
-            "url": creds["VRR"].url,
-            "requestorRef": creds["VRR"].token,
-            "searchName": "bahnhof"
+            name: "VRR",
+            url: creds["VRR"].url,
+            requestorRef: creds["VRR"].token,
+            searchName: "bahnhof",
+            journeyOrigin: "de:05314:63101",
+            journeyDestination: "de:05382:55101"
         }, {
-            "name": "VVO",
-            "url": creds["VVO"].url,
-            "requestorRef": creds["VVO"].token,
-            "headers": { "Content-Type": "text/xml" },
-            "searchName": "dresden",
+            name: "VVO",
+            url: creds["VVO"].url,
+            requestorRef: creds["VVO"].token,
+            headers: { "Content-Type": "text/xml" },
+            searchName: "dresden",
+            journeyOrigin: "de:14612:28",
+            journeyDestination: "de:14713:8010205"
         }
     ]
 
@@ -56,11 +64,14 @@ describe("Test providers", () => {
             expect(departuresResult.departures.length).toBeGreaterThanOrEqual(1);
             expect(departuresResult.departures[0].type).toEqual("stopover");
 
-            /*const journeysResult = await client.getJourneys({
-                origin: "de:08222:2417",
-                destination: "de:08221:1146",
-                arrivalTime: "2021-03-31T16:00+02:00"
-            });*/
+            const journeysResult = await client.getJourneys({
+                origin: provider.journeyOrigin,
+                destination: provider.journeyDestination
+            });
+
+            expect(journeysResult.success).toEqual(true);
+            expect(journeysResult.journeys.length).toBeGreaterThanOrEqual(1);
+            expect(journeysResult.journeys[0].type).toEqual("journey");
 
         });
     }
