@@ -19,7 +19,7 @@ export class TRIASJourneysHandler {
         return new Promise((resolve, reject) => {
             const maxResults = options.maxResults ? options.maxResults : 5;
 
-            let arrTime, depTime;
+            let arrTime; let depTime;
             if (options.arrivalTime) arrTime = this.parseRequestTime(options.arrivalTime);
             else if (options.departureTime) depTime = this.parseRequestTime(options.departureTime);
 
@@ -41,9 +41,9 @@ export class TRIASJourneysHandler {
                 try {
 
                     const doc = new xmldom.DOMParser().parseFromString(body);
-                    var tripsList = doc.getElementsByTagName("Trip");
+                    const tripsList = doc.getElementsByTagName("Trip");
 
-                    for (var i = 0; i < tripsList.length; i++) {
+                    for (let i = 0; i < tripsList.length; i++) {
 
                         const trip: FPTFJourney = {
                             type: "journey",
@@ -58,7 +58,7 @@ export class TRIASJourneysHandler {
 
                         const legsList = tripElement.getElementsByTagName("TripLeg");
 
-                        for (var j = 0; j < legsList.length; j++) {
+                        for (let j = 0; j < legsList.length; j++) {
 
                             const leg: FPTFLeg = {
                                 mode: FPTFMode.UNKNOWN,
@@ -69,7 +69,7 @@ export class TRIASJourneysHandler {
                                 arrival: ""
                             }
 
-                            var legElement = legsList[j];
+                            const legElement = legsList[j];
                             if (legElement.getElementsByTagName("TimedLeg").length > 0) {
 
                                 const origin: FPTFStop = {
@@ -235,13 +235,11 @@ export class TRIASJourneysHandler {
 
 
                 } catch (error) {
-                    console.log(error);
                     reject("The client encountered an error during parsing: " + error);
                     return;
                 }
 
             }).catch((error) => {
-                console.log(error);
                 reject(error);
             });
         });
@@ -249,7 +247,7 @@ export class TRIASJourneysHandler {
 
     parseStationID(id: string) {
         if (!id.includes(":")) return id;
-        var t = id.split(":");
+        const t = id.split(":");
         return t[0] + ":" + t[1] + ":" + t[2];
     }
 
