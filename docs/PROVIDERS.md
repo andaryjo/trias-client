@@ -28,7 +28,7 @@ Coming soon™.
 ### [Verkehrsverbund Bremen & Niedersachsen](https://www.vbn.de/service/entwicklerinfos/)
 
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips
-- :white_check_mark: No contract required
+- :heavy_check_mark: No contract required
 - :x: Only 3000 requests per day
 
 ### [Verkehrsverbund Oberelbe](https://www.govdata.de/daten/-/details/api-fahrplanauskunft-vvo)
