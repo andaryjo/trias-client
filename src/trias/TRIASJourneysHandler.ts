@@ -20,8 +20,8 @@ export class TRIASJourneysHandler {
             const maxResults = options.maxResults ? options.maxResults : 5;
 
             let arrTime, depTime;
-            if (options.arrivalTime) arrTime = moment(options.arrivalTime).tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss");
-            else if (options.departureTime) depTime = moment().tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss");
+            if (options.arrivalTime) arrTime = this.parseRequestTime(options.arrivalTime);
+            else if (options.departureTime) depTime = this.parseRequestTime(options.departureTime);
 
             const payload = TRIAS_TR.replace("$ORIGIN", options.origin)
                 .replace("$DESTINATION", options.destination)
@@ -61,11 +61,6 @@ export class TRIASJourneysHandler {
                         for (var j = 0; j < legsList.length; j++) {
 
                             const leg: FPTFLeg = {
-                                line: {
-                                    type: "line",
-                                    id: "",
-                                    line: ""
-                                },
                                 mode: FPTFMode.UNKNOWN,
                                 direction: "",
                                 origin: "",
@@ -131,18 +126,24 @@ export class TRIASJourneysHandler {
                                     if (endPlatform) leg.arrivalPlatform = endPlatform;
                                 }
 
+                                leg.line = {
+                                    type: "line",
+                                    id: "",
+                                    line: ""
+                                }
+
                                 const pubLineNameTextElement = legElement.getElementsByTagName("PublishedLineName")[0].getElementsByTagName("Text")[0];
                                 if (pubLineNameTextElement.childNodes.length > 0) {
-                                    const line = pubLineNameTextElement.childNodes[0].nodeValue;
-                                    if (line) {
-                                        leg.line.id = line;
-                                        leg.line.line = line;
+                                    const lineName = pubLineNameTextElement.childNodes[0].nodeValue;
+                                    if (lineName) {
+                                        leg.line.id = lineName;
+                                        leg.line.line = lineName;
                                     }
                                 } else {
-                                    const line = legElement.getElementsByTagName("Name")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
-                                    if (line) {
-                                        leg.line.id = line;
-                                        leg.line.line = line;
+                                    const lineName = legElement.getElementsByTagName("Name")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
+                                    if (lineName) {
+                                        leg.line.id = lineName;
+                                        leg.line.line = lineName;
                                     }
                                 }
 
@@ -250,6 +251,10 @@ export class TRIASJourneysHandler {
         if (!id.includes(":")) return id;
         var t = id.split(":");
         return t[0] + ":" + t[1] + ":" + t[2];
+    }
+
+    parseRequestTime(time: string) {
+        return "<DepArrTime>" + moment(time).tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss") + "</DepArrTime>";
     }
 
     parseResponseTime(time: string) {

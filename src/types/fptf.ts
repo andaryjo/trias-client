@@ -51,7 +51,7 @@ interface FPTFJourney {
 }
 
 interface FPTFLeg {
-    line: FPTFLine; // Not included in FPTF
+    line?: FPTFLine; // Not included in FPTF
     mode: FPTFMode;
     subMode?: FPTFSubmode;
     direction: string; // Not included in FPTF

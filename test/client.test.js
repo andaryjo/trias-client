@@ -32,8 +32,6 @@ describe("Test providers", () => {
 
     for (const provider of providers) {
 
-        if (provider.name != "VRN") continue;
-
         it("Test for " + provider.name, async () => {
 
             const client = trias.getClient({
@@ -58,12 +56,12 @@ describe("Test providers", () => {
             expect(departuresResult.departures.length).toBeGreaterThanOrEqual(1);
             expect(departuresResult.departures[0].type).toEqual("stopover");
 
-            const journeysResult = await client.getJourneys({
+            /*const journeysResult = await client.getJourneys({
                 origin: "de:08222:2417",
-                destination: "de:08221:1146"
-            });
+                destination: "de:08221:1146",
+                arrivalTime: "2021-03-31T16:00+02:00"
+            });*/
 
-            console.log(JSON.stringify(journeysResult.journeys));
         });
     }
 });

@@ -73,13 +73,13 @@ export class TRIASDeparturesHandler {
 
                         const departureElement = departuresList.item(i);
 
-                        let line;
+                        let lineName;
                         const pubLineNameTextElement = departureElement?.getElementsByTagName("PublishedLineName").item(0)?.getElementsByTagName("Text").item(0);
-                        if (pubLineNameTextElement?.childNodes?.length) line = pubLineNameTextElement.childNodes[0].nodeValue;
-                        else line = departureElement?.getElementsByTagName("Name")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
-                        if (line) {
-                            departure.line.id = line;
-                            departure.line.line = line;
+                        if (pubLineNameTextElement?.childNodes?.length) lineName = pubLineNameTextElement.childNodes[0].nodeValue;
+                        else lineName = departureElement?.getElementsByTagName("Name")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
+                        if (lineName && departure.line) {
+                            departure.line.id = lineName;
+                            departure.line.line = lineName;
                         }
 
                         const direction = departureElement?.getElementsByTagName("DestinationText")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
