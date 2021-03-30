@@ -2,15 +2,7 @@
 
 This Node.js module is written using TypeScript and therefore comes with easy to use type specifications you can have a look at in the [`types`](https://github.com/andaryjo/trias-client/blob/main/src/types) directory.
 
-Every function requires defined [options](https://github.com/andaryjo/trias-client/blob/main/src/types/options.ts) and returns defined [results](https://github.com/andaryjo/trias-client/blob/main/src/types/results.ts), which then include [Friendly Public Transport Format](https://github.com/andaryjo/trias-client/blob/main/src/types/fptf.ts) elements.
-
-## Import
-
-Import the module using:
-
-```javascript
-const trias = require("trias-client");
-```
+Every function requires defined [options](https://github.com/andaryjo/trias-client/blob/main/src/types/options.ts) and returns defined [results](https://github.com/andaryjo/trias-client/blob/main/src/types/results.ts), which then include [Friendly Public Transport Format](https://github.com/andaryjo/trias-client/blob/main/src/types/fptf.ts) elements. As of now, the FPTF does not fully support all TRIAS functionalities, so be aware that there are some [slight differences](https://github.com/andaryjo/trias-client/blob/main/src/types/fptf.ts).
 
 ## trias.getClient(ClientOptions options)
 
@@ -40,6 +32,18 @@ This function returns a list of departures and ticker information for a given st
 
 | Paramater | Description | Type | Required | Default | Example |
 |---|---|---|---|---|---|
-| id | ID of the stop. | string | yes | none | `"1146"` |
-| time | Requested time for departures in ISO 8601 format. | string | no | now | `"2021-03-24T21:14:00+01:00` |
+| id | ID of the stop. | string | yes | none | `"de:08222:2417"` |
+| time | Requested time for departures as ISO 8601. | string | no | now | `"2021-03-24T21:14:00+01:00` |
 | maxResults | Maximum amount of results. | number | no | `25` | `15` |
+
+## client.getJourneys(DeparturesRequestOptions options)
+
+This function returns a list of journeys for given origin and destination stops. It requires `JourneysRequestOptions` and will return a Promise which resolves into a `JourneysResult`.
+
+| Paramater | Description | Type | Required | Default | Example |
+|---|---|---|---|---|---|
+| origin | ID of the origin stop. | string | yes | none | `"de:08222:2417"` |
+| destination | ID of the destination stop. | string | yes | none | `"de:08221:1146"` |
+| arrivalTime | Desired time of arrival as ISO 8601. Overrides departure time. | string | no | none | `"2021-03-24T21:14:00+01:00` |
+| departureTime | Desired time of departure as ISO 8601. Only considered if arrival time is not set. | string | no | now | `"2021-03-24T23:08:00+01:00` |
+| maxResults | Maximum amount of results. | number | no | `5` | `15` |

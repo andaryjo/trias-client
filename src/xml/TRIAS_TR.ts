@@ -6,11 +6,15 @@ export const TRIAS_TR = `
         <RequestPayload>
             <TripRequest>
                 <Origin>
-                    <LocationRef>$ORIGIN</LocationRef>
+                    <LocationRef>
+                        <StopPointRef>$ORIGIN</StopPointRef>
+                    </LocationRef>
                     $DEPTIME
                 </Origin>
                 <Destination>
-                    <LocationRef>$DESTINATION</LocationRef>
+                    <LocationRef>
+                        <StopPointRef>$DESTINATION</StopPointRef>
+                    </LocationRef>
                     $ARRTIME
                 </Destination>
                 <Params>

@@ -65,21 +65,21 @@ export class TRIASDeparturesHandler {
                                 type: "line",
                                 id: "",
                                 line: "",
-                                mode: FPTFMode.UNKNOWN,
                             },
+                            mode: FPTFMode.UNKNOWN,
                             direction: "",
                             departure: "",
                         };
 
                         const departureElement = departuresList.item(i);
 
-                        let line;
+                        let lineName;
                         const pubLineNameTextElement = departureElement?.getElementsByTagName("PublishedLineName").item(0)?.getElementsByTagName("Text").item(0);
-                        if (pubLineNameTextElement?.childNodes?.length) line = pubLineNameTextElement.childNodes[0].nodeValue;
-                        else line = departureElement?.getElementsByTagName("Name")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
-                        if (line) {
-                            departure.line.id = line;
-                            departure.line.line = line;
+                        if (pubLineNameTextElement?.childNodes?.length) lineName = pubLineNameTextElement.childNodes[0].nodeValue;
+                        else lineName = departureElement?.getElementsByTagName("Name")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
+                        if (lineName && departure.line) {
+                            departure.line.id = lineName;
+                            departure.line.line = lineName;
                         }
 
                         const direction = departureElement?.getElementsByTagName("DestinationText")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
@@ -96,16 +96,16 @@ export class TRIASDeparturesHandler {
 
                         const type = departureElement?.getElementsByTagName("PtMode")?.item(0)?.childNodes[0].nodeValue;
                         if (type === "bus") {
-                            departure.line.mode = FPTFMode.BUS;
+                            departure.mode = FPTFMode.BUS;
                         } else if (type === "tram") {
-                            departure.line.mode = FPTFMode.TRAIN;
-                            departure.line.subMode = FPTFSubmode.TRAM;
+                            departure.mode = FPTFMode.TRAIN;
+                            departure.subMode = FPTFSubmode.TRAM;
                         } else if (type === "metro") {
-                            departure.line.mode = FPTFMode.TRAIN;
-                            departure.line.subMode = FPTFSubmode.METRO;
+                            departure.mode = FPTFMode.TRAIN;
+                            departure.subMode = FPTFSubmode.METRO;
                         } else if (type === "rail") {
-                            departure.line.mode = FPTFMode.TRAIN;
-                            departure.line.subMode = FPTFSubmode.RAIL;
+                            departure.mode = FPTFMode.TRAIN;
+                            departure.subMode = FPTFSubmode.RAIL;
                         }
 
                         departures.push(departure);
