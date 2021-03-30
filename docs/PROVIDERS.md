@@ -9,7 +9,7 @@ This is a list of public transport providers that provide a TRIAS API. Be aware 
 ### [Karlsruher Verkehrsverbund](https://www.kvv.de/fahrplan/fahrplaene/open-data.html)
 
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips
-- :heavy_multiplication_x: Contract required
+- :x: Contract required
 
 ### [Münchner Verkehrsverbund](https://www.mvv-muenchen.de/fahrplanauskunft/fuer-entwickler/index.html)
 
@@ -18,18 +18,18 @@ Coming soon™.
 ### [Nahverkehr Baden-Württemberg (bwegt)](https://www.mobidata-bw.de/dataset/trias)
 
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips
-- :heavy_multiplication_x: Contract required
+- :x: Contract required
 
 ### [Schweizerische Bundesbahnen](https://opentransportdata.swiss/dataset/aaa) (Switzerland)
 
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips
-- :white_check_mark: No contract required
+- :heavy_check_mark: No contract required
 
 ### [Verkehrsverbund Bremen & Niedersachsen](https://www.vbn.de/service/entwicklerinfos/)
 
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips
 - :white_check_mark: No contract required
-- :heavy_multiplication_x: Only 3000 requests per day
+- :x: Only 3000 requests per day
 
 ### [Verkehrsverbund Oberelbe](https://www.govdata.de/daten/-/details/api-fahrplanauskunft-vvo)
 
@@ -41,18 +41,18 @@ Use `http://efa.vvo-online.de:8080/std3/trias` as URL and `OpenService` as reque
 ### [Verkehrsverbund Region Trier](https://www.vrt-info.de/openservice)
 
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips
-- :white_check_mark: No contract required
+- :heavy_check_mark: No contract required
 
 ### [Verkehrsverbund Rhein-Neckar](https://www.vrn.de/opendata/API)
 
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips
-- :white_check_mark: No contract required
+- :heavy_check_mark: No contract required
 
 ### [Verkehrsverbund Rhein-Ruhr](https://openvrr.de/pages/api)
 
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips
 - :grey_question: Contract might be required
-- :heavy_multiplication_x: Does not answer to onboarding requests
+- :x: Does not answer to onboarding requests
 
 They provide an open API for testing purposes. Use `http://openservice-test.vrr.de/opendataT/trias` as URL.
 
@@ -64,9 +64,9 @@ They provide an open API for testing purposes. Use `http://openservice-test.vrr.
 ### [Verkehrsverbund Steiermark](https://www.verbundlinie.at/fahrplan/rund-um-den-fahrplan/link-zum-fahrplan) (Austria)
 
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips
-- :white_check_mark: No contract required
+- :heavy_check_mark: No contract required
 
 ### [Verkehrsverbund Stuttgart](https://www.openvvs.de/pages/api)
 
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips
-- :white_check_mark: No contract required
+- :heavy_check_mark: No contract required
