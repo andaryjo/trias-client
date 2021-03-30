@@ -58,16 +58,12 @@ describe("Test providers", () => {
             expect(departuresResult.departures.length).toBeGreaterThanOrEqual(1);
             expect(departuresResult.departures[0].type).toEqual("stopover");
 
-            await client.getJourneys({
+            const journeysResult = await client.getJourneys({
                 origin: "de:08222:2417",
                 destination: "de:08221:1146"
-            }).catch((error) => {
-                console.log(error);
             });
 
-            //console.log(journeysResult);
+            console.log(JSON.stringify(journeysResult.journeys));
         });
-
     }
-
 });

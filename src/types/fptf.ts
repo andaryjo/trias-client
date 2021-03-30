@@ -32,10 +32,10 @@ interface FPTFLine {
 interface FPTFStopover {
     type: string;
     stop: string;
-    line: FPTFLine; // Not included in FPTF
+    line?: FPTFLine; // Not included in FPTF
     mode: FPTFMode;
     subMode?: FPTFSubmode;
-    direction: string; // Not included in FPTF
+    direction?: string; // Not included in FPTF
     arrival?: string;
     arrivalDelay?: number;
     arrivalPlatform?: string;
