@@ -8,6 +8,7 @@ This client aims to be an easy to use and lightweight implementation for the pub
 - Searching for stops (either using a name or coordinates).
 - Fetching departures for a stop.
 - Reading current ticker news for a stop.
+- Navigating from stop to stop.
 
 ## Usage
 
