@@ -65,8 +65,8 @@ export class TRIASDeparturesHandler {
                                 type: "line",
                                 id: "",
                                 line: "",
-                                mode: FPTFMode.UNKNOWN,
                             },
+                            mode: FPTFMode.UNKNOWN,
                             direction: "",
                             departure: "",
                         };
@@ -96,16 +96,16 @@ export class TRIASDeparturesHandler {
 
                         const type = departureElement?.getElementsByTagName("PtMode")?.item(0)?.childNodes[0].nodeValue;
                         if (type === "bus") {
-                            departure.line.mode = FPTFMode.BUS;
+                            departure.mode = FPTFMode.BUS;
                         } else if (type === "tram") {
-                            departure.line.mode = FPTFMode.TRAIN;
-                            departure.line.subMode = FPTFSubmode.TRAM;
+                            departure.mode = FPTFMode.TRAIN;
+                            departure.subMode = FPTFSubmode.TRAM;
                         } else if (type === "metro") {
-                            departure.line.mode = FPTFMode.TRAIN;
-                            departure.line.subMode = FPTFSubmode.METRO;
+                            departure.mode = FPTFMode.TRAIN;
+                            departure.subMode = FPTFSubmode.METRO;
                         } else if (type === "rail") {
-                            departure.line.mode = FPTFMode.TRAIN;
-                            departure.line.subMode = FPTFSubmode.RAIL;
+                            departure.mode = FPTFMode.TRAIN;
+                            departure.subMode = FPTFSubmode.RAIL;
                         }
 
                         departures.push(departure);

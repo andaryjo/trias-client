@@ -27,14 +27,14 @@ interface FPTFLine {
     type: string;
     id: string;
     line: string;
-    mode: FPTFMode;
-    subMode?: FPTFSubmode; // Not included in FPTF
 }
 
 interface FPTFStopover {
     type: string;
     stop: string;
     line: FPTFLine; // Not included in FPTF
+    mode: FPTFMode;
+    subMode?: FPTFSubmode;
     direction: string; // Not included in FPTF
     arrival?: string;
     arrivalDelay?: number;
@@ -51,11 +51,12 @@ interface FPTFJourney {
 }
 
 interface FPTFLeg {
-    line: FPTFLine; // Somehow not included in FPTF
-    //mode: FPTFMode; // Removed because already included in line
-    //subMode: FPTFSubmode;
-    origin: string|FPTFStop|FPTFLocation;
-    destination: string|FPTFStop|FPTFLocation;
+    line: FPTFLine; // Not included in FPTF
+    mode: FPTFMode;
+    subMode?: FPTFSubmode;
+    direction: string; // Not included in FPTF
+    origin: string | FPTFStop | FPTFLocation;
+    destination: string | FPTFStop | FPTFLocation;
     departure: string;
     departureDelay?: number;
     departurePlatform?: string;

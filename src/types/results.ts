@@ -7,6 +7,10 @@ interface DeparturesResult extends Result {
     ticker?: string[];
 }
 
+interface JourneysResult extends Result {
+    journeys?: FPTFJourney[];
+}
+
 interface StopsResult extends Result {
     stops?: FPTFStop[];
 }
