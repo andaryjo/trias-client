@@ -5,6 +5,8 @@ else var creds = require("./test-credentials.json");
 
 describe("Test providers", () => {
 
+    jest.setTimeout(10000);
+
     const providers = [
         {
             "name": "KVV",
