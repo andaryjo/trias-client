@@ -20,7 +20,7 @@ Install the package:
 npm install trias-client
 ```
 
-Following script creates client instance, searches for a station and fetches the departures for the first result. Please refer to the [documentation](https://github.com/andaryjo/trias-client/blob/main/docs/README.md) for more information.
+Following script creates a client instance, searches for a station and fetches the departures for the first result. Please refer to the [documentation](https://github.com/andaryjo/trias-client/blob/main/docs/README.md) for more information.
 
 ```javascript
 const trias = require("trias-client");
