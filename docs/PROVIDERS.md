@@ -1,4 +1,4 @@
-# TRIAS Providers
+# List of TRIAS Providers
 
 This is a list of public transport providers that provide a TRIAS API. Be aware that:
 - Most of them **do not offer open APIs**, but require you to sign up with them.
