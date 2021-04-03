@@ -40,7 +40,6 @@
         "typescript": "^4.2.3"
     },
     "dependencies": {
-        "@types/request": "^2.48.5",
         "@types/xmldom": "^0.1.30",
         "axios": "^0.21.1",
         "moment-timezone": "^0.5.33",
