@@ -30,6 +30,10 @@ export class TRIASStopsHandler {
                     .replace("$RADIUS", options.radius.toString())
                     .replace("$MAXRESULTS", maxResults.toString())
                     .replace("$TOKEN", this.requestorRef);
+            else {
+                reject('options.name or options.{latitude,longitude} must be passed');
+                return;
+            }
 
             if (!this.headers["Content-Type"]) this.headers["Content-Type"] = "application/xml";
 
