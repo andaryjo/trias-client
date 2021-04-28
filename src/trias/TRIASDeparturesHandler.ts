@@ -1,7 +1,6 @@
-import axios from 'axios';
 import * as moment from "moment-timezone";
-import * as xmldom from "xmldom";
 
+import {requestAndParse} from '../request-and-parse';
 import { TRIAS_SER } from "../xml/TRIAS_SER";
 
 export class TRIASDeparturesHandler {
@@ -28,18 +27,14 @@ export class TRIASDeparturesHandler {
                 .replace("$MAXRESULTS", maxResults.toString())
                 .replace("$TOKEN", this.requestorRef);
 
-            if (!this.headers["Content-Type"]) this.headers["Content-Type"] = "application/xml";
-
-            axios.post(this.url, payload, { headers: this.headers }).then((response) => {
-
-                const body = this.sanitizeBody(response.data);
+            requestAndParse(this.url, this.requestorRef, this.headers, payload)
+            .then((doc) => {
 
                 const ticker = [];
                 const departures: FPTFStopover[] = [];
 
                 try {
 
-                    const doc = new xmldom.DOMParser().parseFromString(body);
                     const situationsList = doc.getElementsByTagName("PtSituation");
 
                     for (let i = 0; i < situationsList.length; i++) {
@@ -132,12 +127,5 @@ export class TRIASDeparturesHandler {
 
     parseResponseTime(time: string) {
         return moment(time).tz("Europe/Berlin").format();
-    }
-
-    // Some providers include XML tags like "<trias:Result>"
-    // This function removes them from the body before parsing
-    sanitizeBody(body: string) {
-        if (body.includes("trias:")) body = body.replace(/trias:/g, "");
-        return body;
     }
 }

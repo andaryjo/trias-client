@@ -1,6 +1,4 @@
-import axios from 'axios';
-import * as xmldom from "xmldom";
-
+import {requestAndParse} from '../request-and-parse';
 import { TRIAS_LIR_NAME } from "../xml/TRIAS_LIR_NAME";
 import { TRIAS_LIR_POS } from "../xml/TRIAS_LIR_POS";
 
@@ -35,16 +33,12 @@ export class TRIASStopsHandler {
                 return;
             }
 
-            if (!this.headers["Content-Type"]) this.headers["Content-Type"] = "application/xml";
-
-            axios.post(this.url, payload, { headers: this.headers }).then((response) => {
-
-                const body = this.sanitizeBody(response.data);
+            requestAndParse(this.url, this.requestorRef, this.headers, payload)
+            .then((doc) => {
 
                 const stops: FPTFStop[] = [];
 
                 try {
-                    const doc = new xmldom.DOMParser().parseFromString(body);
                     const locationsList = doc.getElementsByTagName("LocationResult");
 
                     for (let i = 0; i < locationsList.length; i++) {
@@ -93,12 +87,5 @@ export class TRIASStopsHandler {
                 reject(error);
             });
         });
-    }
-
-    // Some providers include XML tags like "<trias:Result>"
-    // This function removes them from the body before parsing
-    sanitizeBody(body: string) {
-        if (body.includes("trias:")) body = body.replace(/trias:/g, "");
-        return body;
     }
 }
