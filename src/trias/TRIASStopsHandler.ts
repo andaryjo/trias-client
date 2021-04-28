@@ -13,79 +13,65 @@ export class TRIASStopsHandler {
         this.headers = headers;
     }
 
-    getStops(options: StopsRequestOptions) {
-        return new Promise((resolve, reject) => {
-            const maxResults = options.maxResults ? options.maxResults : 10;
-            let payload;
+    async getStops(options: StopsRequestOptions): Promise<StopsResult> {
+        const maxResults = options.maxResults ? options.maxResults : 10;
+        let payload;
 
-            if (options.name)
-                payload = TRIAS_LIR_NAME.replace("$QUERY", options.name)
-                    .replace("$MAXRESULTS", maxResults.toString())
-                    .replace("$TOKEN", this.requestorRef);
-            else if (options.latitude && options.longitude && options.radius)
-                payload = TRIAS_LIR_POS.replace("$LATITUDE", options.latitude.toString())
-                    .replace("$LONGITUDE", options.longitude.toString())
-                    .replace("$RADIUS", options.radius.toString())
-                    .replace("$MAXRESULTS", maxResults.toString())
-                    .replace("$TOKEN", this.requestorRef);
-            else {
-                reject('options.name or options.{latitude,longitude} must be passed');
-                return;
+        if (options.name)
+            payload = TRIAS_LIR_NAME.replace("$QUERY", options.name)
+                .replace("$MAXRESULTS", maxResults.toString())
+                .replace("$TOKEN", this.requestorRef);
+        else if (options.latitude && options.longitude && options.radius)
+            payload = TRIAS_LIR_POS.replace("$LATITUDE", options.latitude.toString())
+                .replace("$LONGITUDE", options.longitude.toString())
+                .replace("$RADIUS", options.radius.toString())
+                .replace("$MAXRESULTS", maxResults.toString())
+                .replace("$TOKEN", this.requestorRef);
+        else {
+            throw new Error('options.name or options.{latitude,longitude} must be passed');
+        }
+
+        const doc = await requestAndParse(this.url, this.requestorRef, this.headers, payload);
+
+        const stops: FPTFStop[] = [];
+
+        const locationsList = doc.getElementsByTagName("LocationResult");
+
+        for (let i = 0; i < locationsList.length; i++) {
+
+            const stop: FPTFStop = {
+                type: "stop",
+                id: "",
+                name: "",
+            };
+
+            const locationElement = locationsList.item(i);
+
+            const id = locationElement?.getElementsByTagName("StopPointRef")?.item(0)?.childNodes[0].nodeValue;
+            if (id) stop.id = id;
+
+            const latitude = locationElement?.getElementsByTagName("Latitude")?.item(0)?.childNodes[0]?.nodeValue;
+            const longitude = locationElement?.getElementsByTagName("Longitude")?.item(0)?.childNodes[0]?.nodeValue;
+            if (latitude && longitude) {
+                stop.location = {
+                    type: "location",
+                    latitude: parseFloat(latitude),
+                    longitude: parseFloat(longitude)
+                };
             }
 
-            requestAndParse(this.url, this.requestorRef, this.headers, payload)
-            .then((doc) => {
+            const stationName = locationElement?.getElementsByTagName("StopPointName")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
+            const locationName = locationElement?.getElementsByTagName("LocationName")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
 
-                const stops: FPTFStop[] = [];
+            if (locationName && stationName && !stationName.includes(locationName)) stop.name = locationName + " " + stationName;
+            else if (stationName) stop.name = stationName;
 
-                try {
-                    const locationsList = doc.getElementsByTagName("LocationResult");
+            stops.push(stop);
+        }
 
-                    for (let i = 0; i < locationsList.length; i++) {
-
-                        const stop: FPTFStop = {
-                            type: "stop",
-                            id: "",
-                            name: "",
-                        };
-
-                        const locationElement = locationsList.item(i);
-
-                        const id = locationElement?.getElementsByTagName("StopPointRef")?.item(0)?.childNodes[0].nodeValue;
-                        if (id) stop.id = id;
-
-                        const latitude = locationElement?.getElementsByTagName("Latitude")?.item(0)?.childNodes[0]?.nodeValue;
-                        const longitude = locationElement?.getElementsByTagName("Longitude")?.item(0)?.childNodes[0]?.nodeValue;
-                        if (latitude && longitude) {
-                            stop.location = {
-                                type: "location",
-                                latitude: parseFloat(latitude),
-                                longitude: parseFloat(longitude)
-                            };
-                        }
-
-                        const stationName = locationElement?.getElementsByTagName("StopPointName")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
-                        const locationName = locationElement?.getElementsByTagName("LocationName")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
-
-                        if (locationName && stationName && !stationName.includes(locationName)) stop.name = locationName + " " + stationName;
-                        else if (stationName) stop.name = stationName;
-
-                        stops.push(stop);
-                    }
-
-                    const result: StopsResult = {
-                        success: true,
-                        stops,
-                    };
-
-                    resolve(result);
-                } catch (error) {
-                    reject("The client encountered an error during parsing: " + error);
-                    return;
-                }
-            }).catch((error) => {
-                reject(error);
-            });
-        });
+        return {
+            success: true,
+            stops,
+        };
     }
 }
