@@ -16,6 +16,7 @@ interface JourneyRequestOptions {
     departureTime?: string;
     arrivalTime?: string;
     maxResults?: number;
+    includeFares?: boolean;
 }
 
 interface StopsRequestOptions {

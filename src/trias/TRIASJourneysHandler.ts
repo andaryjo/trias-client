@@ -1,4 +1,5 @@
 import * as moment from "moment-timezone";
+import {get} from "lodash";
 
 import {requestAndParse} from '../request-and-parse';
 import { TRIAS_TR } from "../xml/TRIAS_TR";
@@ -27,26 +28,28 @@ export class TRIASJourneysHandler {
                 .replace("$DEPTIME", depTime ? depTime : "")
                 .replace("$ARRTIME", arrTime ? arrTime : "")
                 .replace("$MAXRESULTS", maxResults.toString())
+                .replace("$INCLUDE_FARES", options.includeFares ? 'true' : 'false')
                 .replace("$TOKEN", this.requestorRef);
 
             requestAndParse(this.url, this.requestorRef, this.headers, payload)
             .then((doc) => {
 
-                const trips: FPTFJourney[] = [];
+                const trips: Journey[] = [];
 
                 try {
 
-                    const tripsList = doc.getElementsByTagName("Trip");
+                    const tripsResults = doc.getElementsByTagName("TripResult");
 
-                    for (let i = 0; i < tripsList.length; i++) {
+                    for (let i = 0; i < tripsResults.length; i++) {
 
-                        const trip: FPTFJourney = {
+                        const trip: Journey = {
                             type: "journey",
                             id: "",
-                            legs: []
+                            legs: [],
+                            tickets: [],
                         }
 
-                        const tripElement = tripsList[i];
+                        const tripElement = tripsResults[i].getElementsByTagName('Trip')[0];
 
                         const tripID = tripElement.getElementsByTagName("TripId")[0].childNodes[0].nodeValue;
                         if (tripID) trip.id = tripID;
@@ -217,6 +220,16 @@ export class TRIASJourneysHandler {
 
                         }
 
+                        if (options.includeFares) {
+                            // todo: there might be multiple
+                            const faresEl = tripsResults[i].getElementsByTagName('TripFares')[0];
+                            const ticketEls = faresEl.getElementsByTagName('Ticket');
+                            for (let j = 0; j < ticketEls.length; j++) {
+                                const ticketEl = ticketEls[j];
+                                trip.tickets.push(this.parseResponseTicket(ticketEl));
+                            }
+                        }
+
                         trips.push(trip);
 
                     }
@@ -252,5 +265,29 @@ export class TRIASJourneysHandler {
 
     parseResponseTime(time: string) {
         return moment(time).tz("Europe/Berlin").format();
+    }
+
+    // todo: specify proper type for `ticketEl`: XML DOM node
+    parseResponseTicket(ticketEl: any): Ticket {
+        function getTextOf(tagName: string) {
+            return get(
+             ticketEl.getElementsByTagName(tagName),
+             '[0].childNodes[0].nodeValue',
+             null,
+            );
+        }
+        const price = getTextOf('Price');
+        return {
+            id: getTextOf('TicketId'),
+            name: getTextOf('TicketName'),
+            faresAuthorityRef: getTextOf('FaresAuthorityRef'),
+            faresAuthorityName: getTextOf('FaresAuthorityText'),
+            price: price && parseFloat(price),
+            currency: getTextOf('Currency'),
+            tariffLevel: getTextOf('TariffLevel'),
+            travelClass: getTextOf('TravelClass'),
+            validFor: getTextOf('ValidFor'),
+            validityDuration: getTextOf('ValidityDuration'),
+        }
     }
 }
