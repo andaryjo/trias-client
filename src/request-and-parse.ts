@@ -1,6 +1,8 @@
 import axios, {AxiosRequestConfig, AxiosResponse} from 'axios';
 import {DOMParser} from "xmldom";
 
+const DEBUG = /(^|,)trias-client(,|$)/.test(process.env.DEBUG || '')
+
 export async function request(
     url: string,
     requestorRef: string,
@@ -21,8 +23,12 @@ export async function request(
         },
         data: reqBody,
     };
+    // tslint:disable-next-line:no-console
+    if (DEBUG) console.error(reqBody);
 
     const res = await axios(req);
+    // tslint:disable-next-line:no-console
+    if (DEBUG) console.error(res.data);
     return res;
 }
 
