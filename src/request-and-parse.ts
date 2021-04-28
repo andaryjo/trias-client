@@ -1,5 +1,8 @@
 import axios, {AxiosRequestConfig, AxiosResponse} from 'axios';
-import {Document, Node as DOMNode, Element as DOMElement} from 'domhandler';
+import {
+    Document, Node as DOMNode, Element as DOMElement,
+    DomHandler as DOMHandler, DomHandlerOptions as DOMHandlerOptions,
+} from 'domhandler';
 import {
     Options as CssSelectOptions,
     selectAll as _selectAll,
@@ -10,7 +13,7 @@ import {CompiledQuery} from 'css-select/lib/types';
 import {
     getText as _getText,
 } from 'domutils';
-import {parseDocument} from 'htmlparser2';
+import {Parser, ParserOptions} from 'htmlparser2';
 
 export {Element as DOMElement} from 'domhandler';
 
@@ -84,6 +87,26 @@ export function getText(
     return node ? _getText(node) : null;
 }
 
+// https://github.com/fb55/htmlparser2/blob/ee6879069b4d30ecb327ca1426747791f45d3920/src/index.ts#L18-L28
+export function parseResponse(data: string): Document {
+    const handler = new DOMHandler(null, {
+        withStartIndices: false,
+        withEndIndices: false,
+    });
+    const onOpenTag = handler.onopentag.bind(handler);
+    // https://github.com/fb55/domhandler/blob/7aec3ae0f4ac59325f04d833a6e10f767a49d035/src/index.ts#L160-L165
+    handler.onopentag = (name: string, attribs: { [key: string]: string }): void => {
+        onOpenTag(name.replace(/^trias:/, ''), attribs);
+    };
+
+    const parser = new Parser(handler, {
+        xmlMode: true,
+        decodeEntities: true,
+    });
+    parser.end(data);
+    return handler.root;
+}
+
 export async function requestAndParse(
     url: string,
     requestorRef: string,
@@ -91,17 +114,5 @@ export async function requestAndParse(
     reqBody: string,
 ): Promise<Document> {
     const res = await request(url, requestorRef, headers, reqBody);
-
-    // Some providers include XML tags like "<trias:Result>"
-    // This function removes them from the body before parsing
-    const sanitizedBody = res.data.replace(/trias:/g, "");
-
-    const doc = parseDocument(sanitizedBody, {
-        xmlMode: true,
-        decodeEntities: true,
-        withStartIndices: false,
-        withEndIndices: false,
-    });
-
-    return doc;
+    return parseResponse(res.data);
 }
