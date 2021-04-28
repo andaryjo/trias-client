@@ -1,4 +1,4 @@
-import {requestAndParse} from '../request-and-parse';
+import {requestAndParse, selectAll, selectOne, getText} from '../request-and-parse';
 import { TRIAS_LIR_NAME } from "../xml/TRIAS_LIR_NAME";
 import { TRIAS_LIR_POS } from "../xml/TRIAS_LIR_POS";
 
@@ -35,9 +35,7 @@ export class TRIASStopsHandler {
 
         const stops: FPTFStop[] = [];
 
-        const locationsList = doc.getElementsByTagName("LocationResult");
-
-        for (let i = 0; i < locationsList.length; i++) {
+        for (const locationEl of selectAll('LocationResult', doc)) {
 
             const stop: FPTFStop = {
                 type: "stop",
@@ -45,13 +43,11 @@ export class TRIASStopsHandler {
                 name: "",
             };
 
-            const locationElement = locationsList.item(i);
-
-            const id = locationElement?.getElementsByTagName("StopPointRef")?.item(0)?.childNodes[0].nodeValue;
+            const id = getText(selectOne('StopPointRef', locationEl));
             if (id) stop.id = id;
 
-            const latitude = locationElement?.getElementsByTagName("Latitude")?.item(0)?.childNodes[0]?.nodeValue;
-            const longitude = locationElement?.getElementsByTagName("Longitude")?.item(0)?.childNodes[0]?.nodeValue;
+            const latitude = getText(selectOne('Latitude', locationEl));
+            const longitude = getText(selectOne('Longitude', locationEl));
             if (latitude && longitude) {
                 stop.location = {
                     type: "location",
@@ -60,8 +56,8 @@ export class TRIASStopsHandler {
                 };
             }
 
-            const stationName = locationElement?.getElementsByTagName("StopPointName")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
-            const locationName = locationElement?.getElementsByTagName("LocationName")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
+            const stationName = getText(selectOne('StopPointName Text', locationEl));
+            const locationName = getText(selectOne('LocationName Text', locationEl));
 
             if (locationName && stationName && !stationName.includes(locationName)) stop.name = locationName + " " + stationName;
             else if (stationName) stop.name = stationName;

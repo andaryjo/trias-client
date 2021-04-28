@@ -23,16 +23,16 @@ interface Ticket {
 	name: string;
 	faresAuthorityRef: string;
 	faresAuthorityName: string;
-	price?: number;
+	price: number | null;
 	// todo: <NetPrice>
-	currency?: string;
+	currency: string | null;
 	// todo: <VatRate>
-	tariffLevel?: string;
+	tariffLevel: string | null;
 	// todo: <TariffLevelLabel>
-	travelClass?: string; // todo: make an enum
+	travelClass: string | null; // todo: make an enum
 	// todo: <RequiredCard>
-	validFor?: string; // todo: make an enum
-	validityDuration?: string;
+	validFor: string | null; // todo: make an enum
+	validityDuration: string | null;
 	// todo: <ValidityDurationText>
 	// todo: <ValidityFareZones>
 	// todo: <ValidityAreaText>

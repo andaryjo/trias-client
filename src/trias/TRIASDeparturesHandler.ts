@@ -1,6 +1,6 @@
 import * as moment from "moment-timezone";
 
-import {requestAndParse} from '../request-and-parse';
+import {requestAndParse, selectAll, selectOne, getText} from '../request-and-parse';
 import { TRIAS_SER } from "../xml/TRIAS_SER";
 
 export class TRIASDeparturesHandler {
@@ -31,24 +31,17 @@ export class TRIASDeparturesHandler {
         const ticker = [];
         const departures: FPTFStopover[] = [];
 
-        const situationsList = doc.getElementsByTagName("PtSituation");
-
-        for (let i = 0; i < situationsList.length; i++) {
-
-            const situationElement = situationsList.item(i);
-            const summary = situationElement?.getElementsByTagName("Summary").item(0)?.childNodes[0].nodeValue;
+        for (const situationEl of selectAll('PtSituation', doc)) {
+            const summary = getText(selectOne('Summary', situationEl));
             if (!summary) continue;
-            const startTime = situationElement?.getElementsByTagName("StartTime").item(0)?.childNodes[0].nodeValue;
-            const endTime = situationElement?.getElementsByTagName("EndTime").item(0)?.childNodes[0].nodeValue;
+            const startTime = getText(selectOne('StartTime', situationEl));
+            const endTime = getText(selectOne('EndTime', situationEl));
 
             const now = moment().unix();
             if (now > moment(startTime).unix() && now < moment(endTime).unix()) ticker.push(summary);
         }
 
-        const departuresList = doc.getElementsByTagName("StopEvent");
-
-        for (let i = 0; i < departuresList.length; i++) {
-
+        for (const departureEl of selectAll('StopEvent', doc)) {
             const departure: FPTFStopover = {
                 type: "stopover",
                 stop: options.id,
@@ -62,30 +55,28 @@ export class TRIASDeparturesHandler {
                 departure: "",
             };
 
-            const departureElement = departuresList.item(i);
-
-            let lineName;
-            const pubLineNameTextElement = departureElement?.getElementsByTagName("PublishedLineName").item(0)?.getElementsByTagName("Text").item(0);
-            if (pubLineNameTextElement?.childNodes?.length) lineName = pubLineNameTextElement.childNodes[0].nodeValue;
-            else lineName = departureElement?.getElementsByTagName("Name")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
+            const lineName = (
+                getText(selectOne('PublishedLineName Text', departureEl)) ||
+                getText(selectOne('Name Text', departureEl))
+            );
             if (lineName && departure.line) {
                 departure.line.id = lineName;
                 departure.line.line = lineName;
             }
 
-            const direction = departureElement?.getElementsByTagName("DestinationText")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
+            const direction = getText(selectOne('DestinationText Text', departureEl));
             if (direction) departure.direction = direction;
 
-            const timetabledTime = departureElement?.getElementsByTagName("TimetabledTime")?.item(0)?.childNodes[0].nodeValue;
+            const timetabledTime = getText(selectOne('TimetabledTime', departureEl));
             if (timetabledTime) departure.departure = this.parseResponseTime(timetabledTime);
 
-            const estimatedTime = departureElement?.getElementsByTagName("EstimatedTime")?.item(0)?.childNodes[0].nodeValue;
+            const estimatedTime = getText(selectOne('EstimatedTime', departureEl));
             if (estimatedTime) departure.departureDelay = moment(estimatedTime).unix() - moment(timetabledTime).unix();
 
-            const plannedBay = departureElement?.getElementsByTagName("PlannedBay")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
+            const plannedBay = getText(selectOne('PlannedBay Text', departureEl));
             if (plannedBay) departure.departurePlatform = plannedBay;
 
-            const type = departureElement?.getElementsByTagName("PtMode")?.item(0)?.childNodes[0].nodeValue;
+            const type = getText(selectOne('PtMode', departureEl));
             if (type === "bus") {
                 departure.mode = FPTFMode.BUS;
             } else if (type === "tram") {

@@ -1,7 +1,10 @@
 import * as moment from "moment-timezone";
 import {get} from "lodash";
 
-import {requestAndParse} from '../request-and-parse';
+import {
+    requestAndParse,
+    selectAll, selectOne, getText, DOMElement,
+} from '../request-and-parse';
 import { TRIAS_TR } from "../xml/TRIAS_TR";
 
 export class TRIASJourneysHandler {
@@ -34,10 +37,7 @@ export class TRIASJourneysHandler {
 
         const trips: Journey[] = [];
 
-        const tripsResults = doc.getElementsByTagName("TripResult");
-
-        for (let i = 0; i < tripsResults.length; i++) {
-
+        for (const tripEl of selectAll('TripResult', doc)) {
             const trip: Journey = {
                 type: "journey",
                 id: "",
@@ -45,15 +45,10 @@ export class TRIASJourneysHandler {
                 tickets: [],
             }
 
-            const tripElement = tripsResults[i].getElementsByTagName('Trip')[0];
-
-            const tripID = tripElement.getElementsByTagName("TripId")[0].childNodes[0].nodeValue;
+            const tripID = getText(selectOne('TripId', tripEl));
             if (tripID) trip.id = tripID;
 
-            const legsList = tripElement.getElementsByTagName("TripLeg");
-
-            for (let j = 0; j < legsList.length; j++) {
-
+            for (const legEl of selectAll('TripLeg', tripEl)) {
                 const leg: FPTFLeg = {
                     mode: FPTFMode.UNKNOWN,
                     direction: "",
@@ -63,35 +58,29 @@ export class TRIASJourneysHandler {
                     arrival: ""
                 }
 
-                const legElement = legsList[j];
-                if (legElement.getElementsByTagName("TimedLeg").length > 0) {
-
+                if (selectOne('TimedLeg', legEl)) {
                     const origin: FPTFStop = {
                         type: "stop",
                         id: "",
                         name: ""
                     }
 
-                    const legBoardElement = legElement.getElementsByTagName("LegBoard")[0];
+                    const legBoardEl = selectOne('LegBoard', legEl);
 
-                    const startStationID = legBoardElement.getElementsByTagName("StopPointRef")[0].childNodes[0].nodeValue;
+                    const startStationID = getText(selectOne('StopPointRef', legBoardEl));
                     if (startStationID) origin.id = this.parseStationID(startStationID);
 
-                    const startStationName = legBoardElement.getElementsByTagName("StopPointName")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
+                    const startStationName = getText(selectOne('StopPointName Text', legBoardEl));
                     if (startStationName) origin.name = startStationName;
 
-                    const startTime = legBoardElement.getElementsByTagName("TimetabledTime")[0].childNodes[0].nodeValue;
+                    const startTime = getText(selectOne('TimetabledTime', legBoardEl));
                     if (startTime) leg.departure = this.parseResponseTime(startTime);
 
-                    if (legBoardElement.getElementsByTagName("EstimatedTime").length > 0) {
-                        const startRealtime = legBoardElement.getElementsByTagName("EstimatedTime")[0].childNodes[0].nodeValue;
-                        if (startRealtime) leg.departureDelay = moment(startRealtime).unix() - moment(leg.departure).unix();
-                    }
+                    const startRealtime = getText(selectOne('EstimatedTime', legBoardEl));
+                    if (startRealtime) leg.departureDelay = moment(startRealtime).unix() - moment(leg.departure).unix();
 
-                    if (legBoardElement.getElementsByTagName("PlannedBay").length > 0) {
-                        const startPlatform = legBoardElement.getElementsByTagName("PlannedBay")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
-                        if (startPlatform) leg.departurePlatform = startPlatform;
-                    }
+                    const startPlatform = getText(selectOne('PlannedBay Text', legBoardEl));
+                    if (startPlatform) leg.departurePlatform = startPlatform;
 
                     const destination: FPTFStop = {
                         type: "stop",
@@ -99,26 +88,22 @@ export class TRIASJourneysHandler {
                         name: ""
                     }
 
-                    const legAlightElement = legElement.getElementsByTagName("LegAlight")[0];
+                    const legAlightEl = selectOne('LegAlight', legEl);
 
-                    const endStationID = legAlightElement.getElementsByTagName("StopPointRef")[0].childNodes[0].nodeValue;
+                    const endStationID = getText(selectOne('StopPointRef', legAlightEl));
                     if (endStationID) destination.id = this.parseStationID(endStationID);
 
-                    const endStationName = legAlightElement.getElementsByTagName("StopPointName")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
+                    const endStationName = getText(selectOne('StopPointName Text', legAlightEl));
                     if (endStationName) destination.name = endStationName;
 
-                    const endTime = legAlightElement.getElementsByTagName("TimetabledTime")[0].childNodes[0].nodeValue;
+                    const endTime = getText(selectOne('TimetabledTime', legAlightEl));
                     if (endTime) leg.arrival = this.parseResponseTime(endTime);
 
-                    if (legAlightElement.getElementsByTagName("EstimatedTime").length > 0) {
-                        const endRealtime = legAlightElement.getElementsByTagName("EstimatedTime")[0].childNodes[0].nodeValue;
-                        if (endRealtime) leg.arrivalDelay = moment(endRealtime).unix() - moment(leg.arrival).unix();
-                    }
+                    const endRealtime = getText(selectOne('EstimatedTime', legAlightEl));
+                    if (endRealtime) leg.arrivalDelay = moment(endRealtime).unix() - moment(leg.arrival).unix();
 
-                    if (legAlightElement.getElementsByTagName("PlannedBay").length > 0) {
-                        const endPlatform = legAlightElement.getElementsByTagName("PlannedBay")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
-                        if (endPlatform) leg.arrivalPlatform = endPlatform;
-                    }
+                    const endPlatform = getText(selectOne('PlannedBay Text', legAlightEl));
+                    if (endPlatform) leg.arrivalPlatform = endPlatform;
 
                     leg.line = {
                         type: "line",
@@ -126,25 +111,19 @@ export class TRIASJourneysHandler {
                         line: ""
                     }
 
-                    const pubLineNameTextElement = legElement.getElementsByTagName("PublishedLineName")[0].getElementsByTagName("Text")[0];
-                    if (pubLineNameTextElement.childNodes.length > 0) {
-                        const lineName = pubLineNameTextElement.childNodes[0].nodeValue;
-                        if (lineName) {
-                            leg.line.id = lineName;
-                            leg.line.line = lineName;
-                        }
-                    } else {
-                        const lineName = legElement.getElementsByTagName("Name")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
-                        if (lineName) {
-                            leg.line.id = lineName;
-                            leg.line.line = lineName;
-                        }
+                    const lineName = (
+                        getText(selectOne('PublishedLineName Text', legEl)) ||
+                        getText(selectOne('Name Text', legEl))
+                    );
+                    if (lineName && leg.line) {
+                        leg.line.id = lineName;
+                        leg.line.line = lineName;
                     }
 
-                    const direction = legElement.getElementsByTagName("DestinationText")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
+                    const direction = getText(selectOne('DestinationText Text', legEl));
                     if (direction) leg.direction = direction;
 
-                    const mode = legElement.getElementsByTagName("PtMode")[0].childNodes[0].nodeValue;
+                    const mode = getText(selectOne('PtMode', legEl));
                     if (mode === "bus") {
                         leg.mode = FPTFMode.BUS;
                     } else if (mode === "tram") {
@@ -161,23 +140,24 @@ export class TRIASJourneysHandler {
                     leg.origin = origin;
                     leg.destination = destination;
 
-                } else if (legElement.getElementsByTagName("ContinuousLeg").length > 0 || legElement.getElementsByTagName("InterchangeLeg").length > 0) {
+                } else if (selectOne('ContinuousLeg', legEl) || selectOne('InterchangeLeg', legEl)) {
 
                     const origin: FPTFLocation = {
                         type: "location",
                         name: ""
                     }
 
-                    const legStartElement = legElement.getElementsByTagName("LegStart")[0];
+                    const legStartEl = selectOne('LegStart', legEl);
 
-                    const startLocationName = legStartElement.getElementsByTagName("LocationName")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
+                    const startLocationName = getText(selectOne('LocationName Text', legStartEl));
                     if (startLocationName) origin.name = startLocationName;
 
-                    if (legStartElement.getElementsByTagName("GeoPosition").length > 0) {
-                        const latitude = legStartElement.getElementsByTagName("Latitude")[0].childNodes[0].nodeValue;
+                    const startGeoPos = selectOne('GeoPosition', legStartEl);
+                    if (startGeoPos) {
+                        const latitude = getText(selectOne('Latitude', startGeoPos));
                         if (latitude) origin.latitude = parseFloat(latitude);
 
-                        const longitude = legStartElement.getElementsByTagName("Longitude")[0].childNodes[0].nodeValue;
+                        const longitude = getText(selectOne('Longitude', startGeoPos));
                         if (longitude) origin.longitude = parseFloat(longitude);
                     }
 
@@ -186,23 +166,24 @@ export class TRIASJourneysHandler {
                         name: ""
                     }
 
-                    const legEndElement = legElement.getElementsByTagName("LegEnd")[0];
+                    const legEndEl = selectOne('LegEnd', legEl);
 
-                    const endLocationName = legEndElement.getElementsByTagName("LocationName")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
+                    const endLocationName = getText(selectOne('LocationName Text', legEl));
                     if (endLocationName) destination.name = endLocationName;
 
-                    if (legEndElement.getElementsByTagName("GeoPosition").length > 0) {
-                        const latitude = legEndElement.getElementsByTagName("Latitude")[0].childNodes[0].nodeValue;
+                    const endGeoPos = selectOne('GeoPosition', legEndEl);
+                    if (endGeoPos) {
+                        const latitude = getText(selectOne('Latitude', endGeoPos));
                         if (latitude) destination.latitude = parseFloat(latitude);
 
-                        const longitude = legEndElement.getElementsByTagName("Longitude")[0].childNodes[0].nodeValue;
+                        const longitude = getText(selectOne('Longitude', endGeoPos));
                         if (longitude) destination.longitude = parseFloat(longitude);
                     }
 
-                    const startTime = legElement.getElementsByTagName("TimeWindowStart")[0].childNodes[0].nodeValue;
+                    const startTime = getText(selectOne('TimeWindowStart', legEl));
                     if (startTime) leg.departure = this.parseResponseTime(startTime);
 
-                    const endTime = legElement.getElementsByTagName("TimeWindowEnd")[0].childNodes[0].nodeValue;
+                    const endTime = getText(selectOne('TimeWindowEnd', legEl));
                     if (endTime) leg.arrival = this.parseResponseTime(endTime);
 
                     leg.mode = FPTFMode.WALKING;
@@ -218,11 +199,10 @@ export class TRIASJourneysHandler {
 
             if (options.includeFares) {
                 // todo: there might be multiple
-                const faresEl = tripsResults[i].getElementsByTagName('TripFares')[0];
-                const ticketEls = faresEl.getElementsByTagName('Ticket');
-                for (let j = 0; j < ticketEls.length; j++) {
-                    const ticketEl = ticketEls[j];
-                    trip.tickets.push(this.parseResponseTicket(ticketEl));
+                const faresEl = selectOne('TripFares', tripEl);
+                for (const ticketEl of selectAll('Ticket', faresEl)) {
+                    const ticket = this.parseResponseTicket(ticketEl)
+                    if (ticket) trip.tickets.push(ticket);
                 }
             }
 
@@ -250,27 +230,24 @@ export class TRIASJourneysHandler {
         return moment(time).tz("Europe/Berlin").format();
     }
 
-    // todo: specify proper type for `ticketEl`: XML DOM node
-    parseResponseTicket(ticketEl: any): Ticket {
-        function getTextOf(tagName: string) {
-            return get(
-             ticketEl.getElementsByTagName(tagName),
-             '[0].childNodes[0].nodeValue',
-             null,
-            );
-        }
-        const price = getTextOf('Price');
+    parseResponseTicket(ticketEl: DOMElement): Ticket | null {
+        const id = getText(selectOne('TicketId', ticketEl));
+        const name = getText(selectOne('TicketName', ticketEl));
+        const faresAuthorityRef = getText(selectOne('FaresAuthorityRef', ticketEl));
+        const faresAuthorityName = getText(selectOne('FaresAuthorityText', ticketEl));
+        if (!id || !name || !faresAuthorityRef || !faresAuthorityName) return null;
+        const price = getText(selectOne('Price', ticketEl));
         return {
-            id: getTextOf('TicketId'),
-            name: getTextOf('TicketName'),
-            faresAuthorityRef: getTextOf('FaresAuthorityRef'),
-            faresAuthorityName: getTextOf('FaresAuthorityText'),
-            price: price && parseFloat(price),
-            currency: getTextOf('Currency'),
-            tariffLevel: getTextOf('TariffLevel'),
-            travelClass: getTextOf('TravelClass'),
-            validFor: getTextOf('ValidFor'),
-            validityDuration: getTextOf('ValidityDuration'),
+            id,
+            name,
+            faresAuthorityRef,
+            faresAuthorityName,
+            price: price ? parseFloat(price) : null,
+            currency: getText(selectOne('Currency', ticketEl)),
+            tariffLevel: getText(selectOne('TariffLevel', ticketEl)),
+            travelClass: getText(selectOne('TravelClass', ticketEl)),
+            validFor: getText(selectOne('ValidFor', ticketEl)),
+            validityDuration: getText(selectOne('ValidityDuration', ticketEl)),
         }
     }
 }
