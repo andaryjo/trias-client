@@ -95,10 +95,13 @@ export class TRIASJourneysHandler {
                     if (startStationName) origin.name = startStationName;
 
                     const startTime = getText(selectOne("TimetabledTime", legBoardEl));
-                    if (startTime) leg.departure = this.parseResponseTime(startTime);
+                    if (startTime) leg.departure = leg.plannedDeparture = this.parseResponseTime(startTime);
 
                     const startRealtime = getText(selectOne("EstimatedTime", legBoardEl));
-                    if (startRealtime) leg.departureDelay = moment(startRealtime).unix() - moment(leg.departure).unix();
+                    if (startRealtime) {
+                        leg.departure = this.parseResponseTime(startRealtime);
+                        leg.departureDelay = moment(leg.departure).unix() - moment(leg.plannedDeparture).unix();
+                    }
 
                     const startPlatform = getText(selectOne("PlannedBay Text", legBoardEl));
                     if (startPlatform) leg.departurePlatform = startPlatform;
@@ -118,10 +121,13 @@ export class TRIASJourneysHandler {
                     if (endStationName) destination.name = endStationName;
 
                     const endTime = getText(selectOne("TimetabledTime", legAlightEl));
-                    if (endTime) leg.arrival = this.parseResponseTime(endTime);
+                    if (endTime) leg.arrival = leg.plannedArrival = this.parseResponseTime(endTime);
 
                     const endRealtime = getText(selectOne("EstimatedTime", legAlightEl));
-                    if (endRealtime) leg.arrivalDelay = moment(endRealtime).unix() - moment(leg.arrival).unix();
+                    if (endRealtime) {
+                        leg.arrival = this.parseResponseTime(endRealtime);
+                        leg.arrivalDelay = moment(leg.arrival).unix() - moment(leg.plannedArrival).unix();
+                    }
 
                     const endPlatform = getText(selectOne("PlannedBay Text", legAlightEl));
                     if (endPlatform) leg.arrivalPlatform = endPlatform;
