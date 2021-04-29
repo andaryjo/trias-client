@@ -16,7 +16,7 @@ This client aims to be an easy to use and lightweight implementation for the pub
 
 Install the package:
 
-```
+```shell
 npm install trias-client
 ```
 
@@ -38,6 +38,8 @@ var departuresResult = await client.getDepartures({
     id: stopsResult.stops[0].id
 });
 ```
+
+There's also an [example script](example.ts) available that demonstrates how to use `trias-client`.
 
 ## What is TRIAS?
 
