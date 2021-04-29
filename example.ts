@@ -8,15 +8,17 @@ const sbbProfile = {
 		authorization: '57c5dbbbf1fe4d000100001842c323fa9ff44fbba0b9b925f0c052d1', // test key
 	},
 }
-const steinSäckingen = '8500320'
-const laufenburg = '8500322'
+const zürich = '8503000'
+const luzern = '8505000'
+const aarau = '8502113'
 
 const client = getTriasClient(sbbProfile)
 
 ;(async () => {
-const {journeys} = await client.getJourneys({
-		origin: steinSäckingen,
-		destination: laufenburg,
+	const {journeys} = await client.getJourneys({
+		origin: zürich,
+		destination: luzern,
+		via: [aarau],
 		departureTime: '2021-05-20T14:00+02:00',
 		maxResults: 2,
 		includeFares: true,

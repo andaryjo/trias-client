@@ -25,7 +25,17 @@ export class TRIASJourneysHandler {
         if (options.arrivalTime) arrTime = this.parseRequestTime(options.arrivalTime);
         else if (options.departureTime) depTime = this.parseRequestTime(options.departureTime);
 
+        const via = (options.via || [])
+            .map((stopId) => `
+                <Via>
+                    <ViaPoint>
+                        <StopPointRef>${stopId}</StopPointRef>
+                    </ViaPoint>
+                </Via>
+            `)
+            .join('');
         const payload = TRIAS_TR.replace("$ORIGIN", options.origin)
+            .replace("$VIA", via)
             .replace("$DESTINATION", options.destination)
             .replace("$DEPTIME", depTime ? depTime : "")
             .replace("$ARRTIME", arrTime ? arrTime : "")

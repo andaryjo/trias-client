@@ -11,6 +11,7 @@ export const TRIAS_TR = `
                     </LocationRef>
                     $DEPTIME
                 </Origin>
+                $VIA
                 <Destination>
                     <LocationRef>
                         <StopPointRef>$DESTINATION</StopPointRef>
