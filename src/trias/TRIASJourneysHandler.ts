@@ -138,6 +138,9 @@ export class TRIASJourneysHandler {
                         line: "",
                     };
 
+                    const tripId = getText(selectOne("JourneyRef", legEl));
+                    if (tripId) leg.tripId = tripId;
+
                     const lineId = getText(selectOne("LineRef", legEl));
                     if (lineId && leg.line) leg.line.id = lineId;
                     const lineName = getText(selectOne("PublishedLineName Text", legEl));
