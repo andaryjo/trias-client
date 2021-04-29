@@ -1,7 +1,10 @@
-import axios from 'axios';
 import * as moment from "moment-timezone";
-import * as xmldom from "xmldom";
+import {get} from "lodash";
 
+import {
+    requestAndParse,
+    selectAll, selectOne, getText, DOMElement,
+} from '../request-and-parse';
 import { TRIAS_TR } from "../xml/TRIAS_TR";
 
 export class TRIASJourneysHandler {
@@ -15,234 +18,212 @@ export class TRIASJourneysHandler {
         this.headers = headers;
     }
 
-    getJourneys(options: JourneyRequestOptions) {
-        return new Promise((resolve, reject) => {
-            const maxResults = options.maxResults ? options.maxResults : 5;
+    async getJourneys(options: JourneyRequestOptions): Promise<JourneysResult> {
+        const maxResults = options.maxResults ? options.maxResults : 5;
 
-            let arrTime; let depTime;
-            if (options.arrivalTime) arrTime = this.parseRequestTime(options.arrivalTime);
-            else if (options.departureTime) depTime = this.parseRequestTime(options.departureTime);
+        let arrTime; let depTime;
+        if (options.arrivalTime) arrTime = this.parseRequestTime(options.arrivalTime);
+        else if (options.departureTime) depTime = this.parseRequestTime(options.departureTime);
 
-            const payload = TRIAS_TR.replace("$ORIGIN", options.origin)
-                .replace("$DESTINATION", options.destination)
-                .replace("$DEPTIME", depTime ? depTime : "")
-                .replace("$ARRTIME", arrTime ? arrTime : "")
-                .replace("$MAXRESULTS", maxResults.toString())
-                .replace("$TOKEN", this.requestorRef);
+        const via = (options.via || [])
+            .map((stopId) => `
+                <Via>
+                    <ViaPoint>
+                        <StopPointRef>${stopId}</StopPointRef>
+                    </ViaPoint>
+                </Via>
+            `)
+            .join('');
+        const payload = TRIAS_TR.replace("$ORIGIN", options.origin)
+            .replace("$VIA", via)
+            .replace("$DESTINATION", options.destination)
+            .replace("$DEPTIME", depTime ? depTime : "")
+            .replace("$ARRTIME", arrTime ? arrTime : "")
+            .replace("$MAXRESULTS", maxResults.toString())
+            .replace("$INCLUDE_FARES", options.includeFares ? 'true' : 'false')
+            .replace("$TOKEN", this.requestorRef);
 
-            if (!this.headers["Content-Type"]) this.headers["Content-Type"] = "application/xml";
+        const doc = await requestAndParse(this.url, this.requestorRef, this.headers, payload);
 
-            axios.post(this.url, payload, { headers: this.headers }).then((response) => {
+        const trips: Journey[] = [];
 
-                const body = this.sanitizeBody(response.data);
+        for (const tripEl of selectAll('TripResult', doc)) {
+            const trip: Journey = {
+                type: "journey",
+                id: "",
+                legs: [],
+                tickets: [],
+            }
 
-                const trips: FPTFJourney[] = [];
+            const tripID = getText(selectOne('TripId', tripEl));
+            if (tripID) trip.id = tripID;
 
-                try {
-
-                    const doc = new xmldom.DOMParser().parseFromString(body);
-                    const tripsList = doc.getElementsByTagName("Trip");
-
-                    for (let i = 0; i < tripsList.length; i++) {
-
-                        const trip: FPTFJourney = {
-                            type: "journey",
-                            id: "",
-                            legs: []
-                        }
-
-                        const tripElement = tripsList[i];
-
-                        const tripID = tripElement.getElementsByTagName("TripId")[0].childNodes[0].nodeValue;
-                        if (tripID) trip.id = tripID;
-
-                        const legsList = tripElement.getElementsByTagName("TripLeg");
-
-                        for (let j = 0; j < legsList.length; j++) {
-
-                            const leg: FPTFLeg = {
-                                mode: FPTFMode.UNKNOWN,
-                                direction: "",
-                                origin: "",
-                                destination: "",
-                                departure: "",
-                                arrival: ""
-                            }
-
-                            const legElement = legsList[j];
-                            if (legElement.getElementsByTagName("TimedLeg").length > 0) {
-
-                                const origin: FPTFStop = {
-                                    type: "stop",
-                                    id: "",
-                                    name: ""
-                                }
-
-                                const legBoardElement = legElement.getElementsByTagName("LegBoard")[0];
-
-                                const startStationID = legBoardElement.getElementsByTagName("StopPointRef")[0].childNodes[0].nodeValue;
-                                if (startStationID) origin.id = this.parseStationID(startStationID);
-
-                                const startStationName = legBoardElement.getElementsByTagName("StopPointName")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
-                                if (startStationName) origin.name = startStationName;
-
-                                const startTime = legBoardElement.getElementsByTagName("TimetabledTime")[0].childNodes[0].nodeValue;
-                                if (startTime) leg.departure = this.parseResponseTime(startTime);
-
-                                if (legBoardElement.getElementsByTagName("EstimatedTime").length > 0) {
-                                    const startRealtime = legBoardElement.getElementsByTagName("EstimatedTime")[0].childNodes[0].nodeValue;
-                                    if (startRealtime) leg.departureDelay = moment(startRealtime).unix() - moment(leg.departure).unix();
-                                }
-
-                                if (legBoardElement.getElementsByTagName("PlannedBay").length > 0) {
-                                    const startPlatform = legBoardElement.getElementsByTagName("PlannedBay")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
-                                    if (startPlatform) leg.departurePlatform = startPlatform;
-                                }
-
-                                const destination: FPTFStop = {
-                                    type: "stop",
-                                    id: "",
-                                    name: ""
-                                }
-
-                                const legAlightElement = legElement.getElementsByTagName("LegAlight")[0];
-
-                                const endStationID = legAlightElement.getElementsByTagName("StopPointRef")[0].childNodes[0].nodeValue;
-                                if (endStationID) destination.id = this.parseStationID(endStationID);
-
-                                const endStationName = legAlightElement.getElementsByTagName("StopPointName")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
-                                if (endStationName) destination.name = endStationName;
-
-                                const endTime = legAlightElement.getElementsByTagName("TimetabledTime")[0].childNodes[0].nodeValue;
-                                if (endTime) leg.arrival = this.parseResponseTime(endTime);
-
-                                if (legAlightElement.getElementsByTagName("EstimatedTime").length > 0) {
-                                    const endRealtime = legAlightElement.getElementsByTagName("EstimatedTime")[0].childNodes[0].nodeValue;
-                                    if (endRealtime) leg.arrivalDelay = moment(endRealtime).unix() - moment(leg.arrival).unix();
-                                }
-
-                                if (legAlightElement.getElementsByTagName("PlannedBay").length > 0) {
-                                    const endPlatform = legAlightElement.getElementsByTagName("PlannedBay")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
-                                    if (endPlatform) leg.arrivalPlatform = endPlatform;
-                                }
-
-                                leg.line = {
-                                    type: "line",
-                                    id: "",
-                                    line: ""
-                                }
-
-                                const pubLineNameTextElement = legElement.getElementsByTagName("PublishedLineName")[0].getElementsByTagName("Text")[0];
-                                if (pubLineNameTextElement.childNodes.length > 0) {
-                                    const lineName = pubLineNameTextElement.childNodes[0].nodeValue;
-                                    if (lineName) {
-                                        leg.line.id = lineName;
-                                        leg.line.line = lineName;
-                                    }
-                                } else {
-                                    const lineName = legElement.getElementsByTagName("Name")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
-                                    if (lineName) {
-                                        leg.line.id = lineName;
-                                        leg.line.line = lineName;
-                                    }
-                                }
-
-                                const direction = legElement.getElementsByTagName("DestinationText")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
-                                if (direction) leg.direction = direction;
-
-                                const mode = legElement.getElementsByTagName("PtMode")[0].childNodes[0].nodeValue;
-                                if (mode === "bus") {
-                                    leg.mode = FPTFMode.BUS;
-                                } else if (mode === "tram") {
-                                    leg.mode = FPTFMode.TRAIN;
-                                    leg.subMode = FPTFSubmode.TRAM;
-                                } else if (mode === "metro") {
-                                    leg.mode = FPTFMode.TRAIN;
-                                    leg.subMode = FPTFSubmode.METRO;
-                                } else if (mode === "rail") {
-                                    leg.mode = FPTFMode.TRAIN;
-                                    leg.subMode = FPTFSubmode.RAIL;
-                                }
-
-                                leg.origin = origin;
-                                leg.destination = destination;
-
-                            } else if (legElement.getElementsByTagName("ContinuousLeg").length > 0 || legElement.getElementsByTagName("InterchangeLeg").length > 0) {
-
-                                const origin: FPTFLocation = {
-                                    type: "location",
-                                    name: ""
-                                }
-
-                                const legStartElement = legElement.getElementsByTagName("LegStart")[0];
-
-                                const startLocationName = legStartElement.getElementsByTagName("LocationName")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
-                                if (startLocationName) origin.name = startLocationName;
-
-                                if (legStartElement.getElementsByTagName("GeoPosition").length > 0) {
-                                    const latitude = legStartElement.getElementsByTagName("Latitude")[0].childNodes[0].nodeValue;
-                                    if (latitude) origin.latitude = parseFloat(latitude);
-
-                                    const longitude = legStartElement.getElementsByTagName("Longitude")[0].childNodes[0].nodeValue;
-                                    if (longitude) origin.longitude = parseFloat(longitude);
-                                }
-
-                                const destination: FPTFLocation = {
-                                    type: "location",
-                                    name: ""
-                                }
-
-                                const legEndElement = legElement.getElementsByTagName("LegEnd")[0];
-
-                                const endLocationName = legEndElement.getElementsByTagName("LocationName")[0].getElementsByTagName("Text")[0].childNodes[0].nodeValue;
-                                if (endLocationName) destination.name = endLocationName;
-
-                                if (legEndElement.getElementsByTagName("GeoPosition").length > 0) {
-                                    const latitude = legEndElement.getElementsByTagName("Latitude")[0].childNodes[0].nodeValue;
-                                    if (latitude) destination.latitude = parseFloat(latitude);
-
-                                    const longitude = legEndElement.getElementsByTagName("Longitude")[0].childNodes[0].nodeValue;
-                                    if (longitude) destination.longitude = parseFloat(longitude);
-                                }
-
-                                const startTime = legElement.getElementsByTagName("TimeWindowStart")[0].childNodes[0].nodeValue;
-                                if (startTime) leg.departure = this.parseResponseTime(startTime);
-
-                                const endTime = legElement.getElementsByTagName("TimeWindowEnd")[0].childNodes[0].nodeValue;
-                                if (endTime) leg.arrival = this.parseResponseTime(endTime);
-
-                                leg.mode = FPTFMode.WALKING;
-
-                                leg.origin = origin;
-                                leg.destination = destination;
-
-                            }
-
-                            trip.legs.push(leg);
-
-                        }
-
-                        trips.push(trip);
-
-                    }
-
-                    const result: JourneysResult = {
-                        success: true,
-                        journeys: trips
-                    }
-
-                    resolve(result);
-
-
-                } catch (error) {
-                    reject("The client encountered an error during parsing: " + error);
-                    return;
+            for (const legEl of selectAll('TripLeg', tripEl)) {
+                const leg: FPTFLeg = {
+                    mode: FPTFMode.UNKNOWN,
+                    direction: "",
+                    origin: "",
+                    destination: "",
+                    departure: "",
+                    arrival: ""
                 }
 
-            }).catch((error) => {
-                reject(error);
-            });
-        });
+                if (selectOne('TimedLeg', legEl)) {
+                    const origin: FPTFStop = {
+                        type: "stop",
+                        id: "",
+                        name: ""
+                    }
+
+                    const legBoardEl = selectOne('LegBoard', legEl);
+
+                    const startStationID = getText(selectOne('StopPointRef', legBoardEl));
+                    if (startStationID) origin.id = this.parseStationID(startStationID);
+
+                    const startStationName = getText(selectOne('StopPointName Text', legBoardEl));
+                    if (startStationName) origin.name = startStationName;
+
+                    const startTime = getText(selectOne('TimetabledTime', legBoardEl));
+                    if (startTime) leg.departure = this.parseResponseTime(startTime);
+
+                    const startRealtime = getText(selectOne('EstimatedTime', legBoardEl));
+                    if (startRealtime) leg.departureDelay = moment(startRealtime).unix() - moment(leg.departure).unix();
+
+                    const startPlatform = getText(selectOne('PlannedBay Text', legBoardEl));
+                    if (startPlatform) leg.departurePlatform = startPlatform;
+
+                    const destination: FPTFStop = {
+                        type: "stop",
+                        id: "",
+                        name: ""
+                    }
+
+                    const legAlightEl = selectOne('LegAlight', legEl);
+
+                    const endStationID = getText(selectOne('StopPointRef', legAlightEl));
+                    if (endStationID) destination.id = this.parseStationID(endStationID);
+
+                    const endStationName = getText(selectOne('StopPointName Text', legAlightEl));
+                    if (endStationName) destination.name = endStationName;
+
+                    const endTime = getText(selectOne('TimetabledTime', legAlightEl));
+                    if (endTime) leg.arrival = this.parseResponseTime(endTime);
+
+                    const endRealtime = getText(selectOne('EstimatedTime', legAlightEl));
+                    if (endRealtime) leg.arrivalDelay = moment(endRealtime).unix() - moment(leg.arrival).unix();
+
+                    const endPlatform = getText(selectOne('PlannedBay Text', legAlightEl));
+                    if (endPlatform) leg.arrivalPlatform = endPlatform;
+
+                    leg.line = {
+                        type: "line",
+                        id: "",
+                        line: ""
+                    }
+
+                    const lineName = (
+                        getText(selectOne('PublishedLineName Text', legEl)) ||
+                        getText(selectOne('Name Text', legEl))
+                    );
+                    if (lineName && leg.line) {
+                        leg.line.id = lineName;
+                        leg.line.line = lineName;
+                    }
+
+                    const direction = getText(selectOne('DestinationText Text', legEl));
+                    if (direction) leg.direction = direction;
+
+                    const mode = getText(selectOne('PtMode', legEl));
+                    if (mode === "bus") {
+                        leg.mode = FPTFMode.BUS;
+                    } else if (mode === "tram") {
+                        leg.mode = FPTFMode.TRAIN;
+                        leg.subMode = FPTFSubmode.TRAM;
+                    } else if (mode === "metro") {
+                        leg.mode = FPTFMode.TRAIN;
+                        leg.subMode = FPTFSubmode.METRO;
+                    } else if (mode === "rail") {
+                        leg.mode = FPTFMode.TRAIN;
+                        leg.subMode = FPTFSubmode.RAIL;
+                    }
+
+                    leg.origin = origin;
+                    leg.destination = destination;
+
+                } else if (selectOne('ContinuousLeg', legEl) || selectOne('InterchangeLeg', legEl)) {
+
+                    const origin: FPTFLocation = {
+                        type: "location",
+                        name: ""
+                    }
+
+                    const legStartEl = selectOne('LegStart', legEl);
+
+                    const startLocationName = getText(selectOne('LocationName Text', legStartEl));
+                    if (startLocationName) origin.name = startLocationName;
+
+                    const startGeoPos = selectOne('GeoPosition', legStartEl);
+                    if (startGeoPos) {
+                        const latitude = getText(selectOne('Latitude', startGeoPos));
+                        if (latitude) origin.latitude = parseFloat(latitude);
+
+                        const longitude = getText(selectOne('Longitude', startGeoPos));
+                        if (longitude) origin.longitude = parseFloat(longitude);
+                    }
+
+                    const destination: FPTFLocation = {
+                        type: "location",
+                        name: ""
+                    }
+
+                    const legEndEl = selectOne('LegEnd', legEl);
+
+                    const endLocationName = getText(selectOne('LocationName Text', legEl));
+                    if (endLocationName) destination.name = endLocationName;
+
+                    const endGeoPos = selectOne('GeoPosition', legEndEl);
+                    if (endGeoPos) {
+                        const latitude = getText(selectOne('Latitude', endGeoPos));
+                        if (latitude) destination.latitude = parseFloat(latitude);
+
+                        const longitude = getText(selectOne('Longitude', endGeoPos));
+                        if (longitude) destination.longitude = parseFloat(longitude);
+                    }
+
+                    const startTime = getText(selectOne('TimeWindowStart', legEl));
+                    if (startTime) leg.departure = this.parseResponseTime(startTime);
+
+                    const endTime = getText(selectOne('TimeWindowEnd', legEl));
+                    if (endTime) leg.arrival = this.parseResponseTime(endTime);
+
+                    leg.mode = FPTFMode.WALKING;
+
+                    leg.origin = origin;
+                    leg.destination = destination;
+
+                }
+
+                trip.legs.push(leg);
+
+            }
+
+            if (options.includeFares) {
+                // todo: there might be multiple
+                const faresEl = selectOne('TripFares', tripEl);
+                for (const ticketEl of selectAll('Ticket', faresEl)) {
+                    const ticket = this.parseResponseTicket(ticketEl)
+                    if (ticket) trip.tickets.push(ticket);
+                }
+            }
+
+            trips.push(trip);
+
+        }
+
+        return {
+            success: true,
+            journeys: trips
+        };
     }
 
     parseStationID(id: string) {
@@ -259,10 +240,24 @@ export class TRIASJourneysHandler {
         return moment(time).tz("Europe/Berlin").format();
     }
 
-    // Some providers include XML tags like "<trias:Result>"
-    // This function removes them from the body before parsing
-    sanitizeBody(body: string) {
-        if (body.includes("trias:")) body = body.replace(/trias:/g, "");
-        return body;
+    parseResponseTicket(ticketEl: DOMElement): Ticket | null {
+        const id = getText(selectOne('TicketId', ticketEl));
+        const name = getText(selectOne('TicketName', ticketEl));
+        const faresAuthorityRef = getText(selectOne('FaresAuthorityRef', ticketEl));
+        const faresAuthorityName = getText(selectOne('FaresAuthorityText', ticketEl));
+        if (!id || !name || !faresAuthorityRef || !faresAuthorityName) return null;
+        const price = getText(selectOne('Price', ticketEl));
+        return {
+            id,
+            name,
+            faresAuthorityRef,
+            faresAuthorityName,
+            price: price ? parseFloat(price) : null,
+            currency: getText(selectOne('Currency', ticketEl)),
+            tariffLevel: getText(selectOne('TariffLevel', ticketEl)),
+            travelClass: getText(selectOne('TravelClass', ticketEl)),
+            validFor: getText(selectOne('ValidFor', ticketEl)),
+            validityDuration: getText(selectOne('ValidityDuration', ticketEl)),
+        }
     }
 }

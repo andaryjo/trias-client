@@ -1,6 +1,4 @@
-import axios from 'axios';
-import * as xmldom from "xmldom";
-
+import {requestAndParse, selectAll, selectOne, getText} from '../request-and-parse';
 import { TRIAS_LIR_NAME } from "../xml/TRIAS_LIR_NAME";
 import { TRIAS_LIR_POS } from "../xml/TRIAS_LIR_POS";
 
@@ -15,86 +13,61 @@ export class TRIASStopsHandler {
         this.headers = headers;
     }
 
-    getStops(options: StopsRequestOptions) {
-        return new Promise((resolve, reject) => {
-            const maxResults = options.maxResults ? options.maxResults : 10;
-            let payload;
+    async getStops(options: StopsRequestOptions): Promise<StopsResult> {
+        const maxResults = options.maxResults ? options.maxResults : 10;
+        let payload;
 
-            if (options.name)
-                payload = TRIAS_LIR_NAME.replace("$QUERY", options.name)
-                    .replace("$MAXRESULTS", maxResults.toString())
-                    .replace("$TOKEN", this.requestorRef);
-            else if (options.latitude && options.longitude && options.radius)
-                payload = TRIAS_LIR_POS.replace("$LATITUDE", options.latitude.toString())
-                    .replace("$LONGITUDE", options.longitude.toString())
-                    .replace("$RADIUS", options.radius.toString())
-                    .replace("$MAXRESULTS", maxResults.toString())
-                    .replace("$TOKEN", this.requestorRef);
+        if (options.name)
+            payload = TRIAS_LIR_NAME.replace("$QUERY", options.name)
+                .replace("$MAXRESULTS", maxResults.toString())
+                .replace("$TOKEN", this.requestorRef);
+        else if (options.latitude && options.longitude && options.radius)
+            payload = TRIAS_LIR_POS.replace("$LATITUDE", options.latitude.toString())
+                .replace("$LONGITUDE", options.longitude.toString())
+                .replace("$RADIUS", options.radius.toString())
+                .replace("$MAXRESULTS", maxResults.toString())
+                .replace("$TOKEN", this.requestorRef);
+        else {
+            throw new Error('options.name or options.{latitude,longitude} must be passed');
+        }
 
-            if (!this.headers["Content-Type"]) this.headers["Content-Type"] = "application/xml";
+        const doc = await requestAndParse(this.url, this.requestorRef, this.headers, payload);
 
-            axios.post(this.url, payload, { headers: this.headers }).then((response) => {
+        const stops: FPTFStop[] = [];
 
-                const body = this.sanitizeBody(response.data);
+        for (const locationEl of selectAll('LocationResult', doc)) {
 
-                const stops: FPTFStop[] = [];
+            const stop: FPTFStop = {
+                type: "stop",
+                id: "",
+                name: "",
+            };
 
-                try {
-                    const doc = new xmldom.DOMParser().parseFromString(body);
-                    const locationsList = doc.getElementsByTagName("LocationResult");
+            const id = getText(selectOne('StopPointRef', locationEl));
+            if (id) stop.id = id;
 
-                    for (let i = 0; i < locationsList.length; i++) {
+            const latitude = getText(selectOne('Latitude', locationEl));
+            const longitude = getText(selectOne('Longitude', locationEl));
+            if (latitude && longitude) {
+                stop.location = {
+                    type: "location",
+                    latitude: parseFloat(latitude),
+                    longitude: parseFloat(longitude)
+                };
+            }
 
-                        const stop: FPTFStop = {
-                            type: "stop",
-                            id: "",
-                            name: "",
-                        };
+            const stationName = getText(selectOne('StopPointName Text', locationEl));
+            const locationName = getText(selectOne('LocationName Text', locationEl));
 
-                        const locationElement = locationsList.item(i);
+            if (locationName && stationName && !stationName.includes(locationName)) stop.name = locationName + " " + stationName;
+            else if (stationName) stop.name = stationName;
 
-                        const id = locationElement?.getElementsByTagName("StopPointRef")?.item(0)?.childNodes[0].nodeValue;
-                        if (id) stop.id = id;
+            stops.push(stop);
+        }
 
-                        const latitude = locationElement?.getElementsByTagName("Latitude")?.item(0)?.childNodes[0]?.nodeValue;
-                        const longitude = locationElement?.getElementsByTagName("Longitude")?.item(0)?.childNodes[0]?.nodeValue;
-                        if (latitude && longitude) {
-                            stop.location = {
-                                type: "location",
-                                latitude: parseFloat(latitude),
-                                longitude: parseFloat(longitude)
-                            };
-                        }
-
-                        const stationName = locationElement?.getElementsByTagName("StopPointName")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
-                        const locationName = locationElement?.getElementsByTagName("LocationName")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
-
-                        if (locationName && stationName && !stationName.includes(locationName)) stop.name = locationName + " " + stationName;
-                        else if (stationName) stop.name = stationName;
-
-                        stops.push(stop);
-                    }
-
-                    const result: StopsResult = {
-                        success: true,
-                        stops,
-                    };
-
-                    resolve(result);
-                } catch (error) {
-                    reject("The client encountered an error during parsing: " + error);
-                    return;
-                }
-            }).catch((error) => {
-                reject(error);
-            });
-        });
-    }
-
-    // Some providers include XML tags like "<trias:Result>"
-    // This function removes them from the body before parsing
-    sanitizeBody(body: string) {
-        if (body.includes("trias:")) body = body.replace(/trias:/g, "");
-        return body;
+        return {
+            success: true,
+            stops,
+        };
     }
 }

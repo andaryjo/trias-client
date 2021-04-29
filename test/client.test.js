@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const trias = require("../lib/index.js");
 
-if (process.env.TEST_CREDENTIALS) var creds = JSON.parse(process.env.TEST_CREDENTIALS);
-else var creds = require("./test-credentials.json");
+const creds = process.env.TEST_CREDENTIALS
+    ? JSON.parse(process.env.TEST_CREDENTIALS)
+    : require("./test-credentials.json");
 
 describe("Test providers", () => {
 

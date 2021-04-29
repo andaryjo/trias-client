@@ -1,7 +1,6 @@
-import axios from 'axios';
 import * as moment from "moment-timezone";
-import * as xmldom from "xmldom";
 
+import {requestAndParse, selectAll, selectOne, getText} from '../request-and-parse';
 import { TRIAS_SER } from "../xml/TRIAS_SER";
 
 export class TRIASDeparturesHandler {
@@ -15,129 +14,93 @@ export class TRIASDeparturesHandler {
         this.headers = headers;
     }
 
-    getDepartures(options: DeparturesRequestOptions) {
-        return new Promise((resolve, reject) => {
-            const maxResults = options.maxResults ? options.maxResults : 20;
+    async getDepartures(options: DeparturesRequestOptions): Promise<DeparturesResult> {
+        const maxResults = options.maxResults ? options.maxResults : 20;
 
-            let time;
-            if (options.time) time = moment(options.time).tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss");
-            else time = moment().tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss");
+        let time;
+        if (options.time) time = moment(options.time).tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss");
+        else time = moment().tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss");
 
-            const payload = TRIAS_SER.replace("$STATIONID", options.id)
-                .replace("$TIME", time)
-                .replace("$MAXRESULTS", maxResults.toString())
-                .replace("$TOKEN", this.requestorRef);
+        const payload = TRIAS_SER.replace("$STATIONID", options.id)
+            .replace("$TIME", time)
+            .replace("$MAXRESULTS", maxResults.toString())
+            .replace("$TOKEN", this.requestorRef);
 
-            if (!this.headers["Content-Type"]) this.headers["Content-Type"] = "application/xml";
+        const doc = await requestAndParse(this.url, this.requestorRef, this.headers, payload);
 
-            axios.post(this.url, payload, { headers: this.headers }).then((response) => {
+        const ticker = [];
+        const departures: FPTFStopover[] = [];
 
-                const body = this.sanitizeBody(response.data);
+        for (const situationEl of selectAll('PtSituation', doc)) {
+            const summary = getText(selectOne('Summary', situationEl));
+            if (!summary) continue;
+            const startTime = getText(selectOne('StartTime', situationEl));
+            const endTime = getText(selectOne('EndTime', situationEl));
 
-                const ticker = [];
-                const departures: FPTFStopover[] = [];
+            const now = moment().unix();
+            if (now > moment(startTime).unix() && now < moment(endTime).unix()) ticker.push(summary);
+        }
 
-                try {
+        for (const departureEl of selectAll('StopEvent', doc)) {
+            const departure: FPTFStopover = {
+                type: "stopover",
+                stop: options.id,
+                line: {
+                    type: "line",
+                    id: "",
+                    line: "",
+                },
+                mode: FPTFMode.UNKNOWN,
+                direction: "",
+                departure: "",
+            };
 
-                    const doc = new xmldom.DOMParser().parseFromString(body);
-                    const situationsList = doc.getElementsByTagName("PtSituation");
+            const lineName = (
+                getText(selectOne('PublishedLineName Text', departureEl)) ||
+                getText(selectOne('Name Text', departureEl))
+            );
+            if (lineName && departure.line) {
+                departure.line.id = lineName;
+                departure.line.line = lineName;
+            }
 
-                    for (let i = 0; i < situationsList.length; i++) {
+            const direction = getText(selectOne('DestinationText Text', departureEl));
+            if (direction) departure.direction = direction;
 
-                        const situationElement = situationsList.item(i);
-                        const summary = situationElement?.getElementsByTagName("Summary").item(0)?.childNodes[0].nodeValue;
-                        if (!summary) continue;
-                        const startTime = situationElement?.getElementsByTagName("StartTime").item(0)?.childNodes[0].nodeValue;
-                        const endTime = situationElement?.getElementsByTagName("EndTime").item(0)?.childNodes[0].nodeValue;
+            const timetabledTime = getText(selectOne('TimetabledTime', departureEl));
+            if (timetabledTime) departure.departure = this.parseResponseTime(timetabledTime);
 
-                        const now = moment().unix();
-                        if (now > moment(startTime).unix() && now < moment(endTime).unix()) ticker.push(summary);
-                    }
+            const estimatedTime = getText(selectOne('EstimatedTime', departureEl));
+            if (estimatedTime) departure.departureDelay = moment(estimatedTime).unix() - moment(timetabledTime).unix();
 
-                    const departuresList = doc.getElementsByTagName("StopEvent");
+            const plannedBay = getText(selectOne('PlannedBay Text', departureEl));
+            if (plannedBay) departure.departurePlatform = plannedBay;
 
-                    for (let i = 0; i < departuresList.length; i++) {
+            const type = getText(selectOne('PtMode', departureEl));
+            if (type === "bus") {
+                departure.mode = FPTFMode.BUS;
+            } else if (type === "tram") {
+                departure.mode = FPTFMode.TRAIN;
+                departure.subMode = FPTFSubmode.TRAM;
+            } else if (type === "metro") {
+                departure.mode = FPTFMode.TRAIN;
+                departure.subMode = FPTFSubmode.METRO;
+            } else if (type === "rail") {
+                departure.mode = FPTFMode.TRAIN;
+                departure.subMode = FPTFSubmode.RAIL;
+            }
 
-                        const departure: FPTFStopover = {
-                            type: "stopover",
-                            stop: options.id,
-                            line: {
-                                type: "line",
-                                id: "",
-                                line: "",
-                            },
-                            mode: FPTFMode.UNKNOWN,
-                            direction: "",
-                            departure: "",
-                        };
+            departures.push(departure);
+        }
 
-                        const departureElement = departuresList.item(i);
-
-                        let lineName;
-                        const pubLineNameTextElement = departureElement?.getElementsByTagName("PublishedLineName").item(0)?.getElementsByTagName("Text").item(0);
-                        if (pubLineNameTextElement?.childNodes?.length) lineName = pubLineNameTextElement.childNodes[0].nodeValue;
-                        else lineName = departureElement?.getElementsByTagName("Name")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
-                        if (lineName && departure.line) {
-                            departure.line.id = lineName;
-                            departure.line.line = lineName;
-                        }
-
-                        const direction = departureElement?.getElementsByTagName("DestinationText")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
-                        if (direction) departure.direction = direction;
-
-                        const timetabledTime = departureElement?.getElementsByTagName("TimetabledTime")?.item(0)?.childNodes[0].nodeValue;
-                        if (timetabledTime) departure.departure = this.parseResponseTime(timetabledTime);
-
-                        const estimatedTime = departureElement?.getElementsByTagName("EstimatedTime")?.item(0)?.childNodes[0].nodeValue;
-                        if (estimatedTime) departure.departureDelay = moment(estimatedTime).unix() - moment(timetabledTime).unix();
-
-                        const plannedBay = departureElement?.getElementsByTagName("PlannedBay")?.item(0)?.getElementsByTagName("Text")?.item(0)?.childNodes[0].nodeValue;
-                        if (plannedBay) departure.departurePlatform = plannedBay;
-
-                        const type = departureElement?.getElementsByTagName("PtMode")?.item(0)?.childNodes[0].nodeValue;
-                        if (type === "bus") {
-                            departure.mode = FPTFMode.BUS;
-                        } else if (type === "tram") {
-                            departure.mode = FPTFMode.TRAIN;
-                            departure.subMode = FPTFSubmode.TRAM;
-                        } else if (type === "metro") {
-                            departure.mode = FPTFMode.TRAIN;
-                            departure.subMode = FPTFSubmode.METRO;
-                        } else if (type === "rail") {
-                            departure.mode = FPTFMode.TRAIN;
-                            departure.subMode = FPTFSubmode.RAIL;
-                        }
-
-                        departures.push(departure);
-                    }
-
-                    const result: DeparturesResult = {
-                        success: true,
-                        departures,
-                        ticker
-                    };
-
-                    resolve(result);
-
-                } catch (error) {
-                    reject("The client encountered an error during parsing: " + error);
-                    return;
-                }
-
-            }).catch((error) => {
-                reject(error);
-            });
-        });
+        return {
+            success: true,
+            departures,
+            ticker
+        };
     }
 
     parseResponseTime(time: string) {
         return moment(time).tz("Europe/Berlin").format();
-    }
-
-    // Some providers include XML tags like "<trias:Result>"
-    // This function removes them from the body before parsing
-    sanitizeBody(body: string) {
-        if (body.includes("trias:")) body = body.replace(/trias:/g, "");
-        return body;
     }
 }

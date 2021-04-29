@@ -13,9 +13,11 @@ interface DeparturesRequestOptions {
 interface JourneyRequestOptions {
     origin: string;
     destination: string;
+    via?: string[];
     departureTime?: string;
     arrivalTime?: string;
     maxResults?: number;
+    includeFares?: boolean;
 }
 
 interface StopsRequestOptions {
