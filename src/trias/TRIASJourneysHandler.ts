@@ -138,11 +138,10 @@ export class TRIASJourneysHandler {
                         line: "",
                     };
 
-                    const lineName = getText(selectOne("PublishedLineName Text", legEl)) || getText(selectOne("Name Text", legEl));
-                    if (lineName && leg.line) {
-                        leg.line.id = lineName;
-                        leg.line.line = lineName;
-                    }
+                    const lineId = getText(selectOne("LineRef", legEl));
+                    if (lineId && leg.line) leg.line.id = lineId;
+                    const lineName = getText(selectOne("PublishedLineName Text", legEl));
+                    if (lineName && leg.line) leg.line.line = lineName;
 
                     const direction = getText(selectOne("DestinationText Text", legEl));
                     if (direction) leg.direction = direction;
