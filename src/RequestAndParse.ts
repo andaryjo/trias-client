@@ -13,7 +13,6 @@ export async function request(url: string, requestorRef: string, headers: { [key
 
     // It is important to keep the functionality to override the Content-Type header. Some APIs do not work with application/xml but only with text/xml
     // Also, using an accept header does not work for the same reason
-
     if (!headers["Content-Type"]) headers["Content-Type"] = "application/xml";
 
     const req: AxiosRequestConfig = {

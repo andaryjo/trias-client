@@ -23,16 +23,7 @@ export class TRIASJourneysHandler {
         else if (options.departureTime) depTime = this.parseRequestTime(options.departureTime);
 
         const via = (options.via || [])
-            .map(
-                (stopId) => `
-                <Via>
-                    <ViaPoint>
-                        <StopPointRef>${stopId}</StopPointRef>
-                    </ViaPoint>
-                </Via>
-            `,
-            )
-            .join("");
+            .map((stationID) => this.parseRequestViaStation(stationID)).join("");
 
         const payload = TRIAS_TR.replace("$ORIGIN", options.origin)
             .replace("$VIA", via)
@@ -222,6 +213,10 @@ export class TRIASJourneysHandler {
         if (!id.includes(":")) return id;
         const t = id.split(":");
         return t[0] + ":" + t[1] + ":" + t[2];
+    }
+
+    parseRequestViaStation(stationID: string) {
+        return "<Via><ViaPoint><StopPointRef>" + stationID + "</StopPointRef></ViaPoint></Via>";
     }
 
     parseRequestTime(time: string) {

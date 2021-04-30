@@ -20,7 +20,7 @@ export const TRIAS_TR = `
                 </Destination>
                 <Params>
                     <IncludeTurnDescription>false</IncludeTurnDescription>
-                    <IncludeTrackSections>true</IncludeTrackSections>
+                    <IncludeTrackSections>false</IncludeTrackSections>
                     <IncludeLegProjection>false</IncludeLegProjection>
                     <IncludeIntermediateStops>false</IncludeIntermediateStops>
                     <IncludeFares>$INCLUDE_FARES</IncludeFares>

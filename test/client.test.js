@@ -22,8 +22,9 @@ describe("Test providers", () => {
             url: creds["VRN"].url,
             requestorRef: creds["VRN"].token,
             searchName: "bismarckplatz",
-            journeyOrigin: "de:08222:2417",
-            journeyDestination: "de:08221:1146"
+            journeyOrigin: "de:08222:2432", // Lange Rötterstraße
+            journeyVia: "de:08221:1146", // Bismarckplatz
+            journeyDestination: "de:08221:1283" // Jägerhaus
         }, {
             name: "VRR",
             url: creds["VRR"].url,
@@ -37,8 +38,8 @@ describe("Test providers", () => {
             requestorRef: creds["VVO"].token,
             headers: { "Content-Type": "text/xml" },
             searchName: "dresden",
-            journeyOrigin: "de:14612:28",
-            journeyDestination: "de:14713:8010205"
+            journeyOrigin: "de:14612:28", // Dresden Hbf
+            journeyDestination: "de:14713:8010205" // Leipzig Hbf
         }
     ]
 
@@ -70,7 +71,8 @@ describe("Test providers", () => {
 
             const journeysResult = await client.getJourneys({
                 origin: provider.journeyOrigin,
-                destination: provider.journeyDestination
+                destination: provider.journeyDestination,
+                via: provider.journeyVia ? [provider.journeyVia] : []
             });
 
             expect(journeysResult.success).toEqual(true);
