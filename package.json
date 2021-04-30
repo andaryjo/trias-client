@@ -1,6 +1,6 @@
 {
     "name": "trias-client",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "Lean Node.js client for public transport TRIAS APIs.",
     "keywords": [
         "public-transport",
