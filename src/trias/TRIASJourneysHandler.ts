@@ -43,7 +43,6 @@ export class TRIASJourneysHandler {
                 type: "journey",
                 id: "",
                 legs: [],
-                tickets: [],
             };
 
             const tripID = getText(selectOne("TripId", tripEl));
@@ -192,6 +191,8 @@ export class TRIASJourneysHandler {
             }
 
             if (options.includeFares) {
+                if (!trip.tickets) trip.tickets = [];
+
                 // todo: there might be multiple
                 const faresEl = selectOne("TripFares", tripEl);
                 for (const ticketEl of selectAll("Ticket", faresEl)) {

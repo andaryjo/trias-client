@@ -48,7 +48,7 @@ interface FPTFJourney {
     type: string;
     id: string;
     legs: FPTFLeg[];
-    tickets: Ticket[]; // Not included in FPTF
+    tickets?: Ticket[]; // Not included in FPTF
 }
 
 interface FPTFLeg {
