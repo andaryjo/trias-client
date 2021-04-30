@@ -10,26 +10,27 @@ export { Element as DOMElement } from "domhandler";
 const DEBUG = /(^|,)trias-client(,|$)/.test(process.env.DEBUG || "");
 
 export async function request(url: string, requestorRef: string, headers: { [key: string]: string }, reqBody: string): Promise<AxiosResponse<string>> {
+
+    // It is important to keep the functionality to override the Content-Type header. Some APIs do not work with application/xml but only with text/xml
+    // Also, using an accept header does not work for the same reason
+
+    if (!headers["Content-Type"]) headers["Content-Type"] = "application/xml";
+
     const req: AxiosRequestConfig = {
         url,
         method: "POST",
-        headers: {
-            // There are two MIME assignments for XML data. These are:
-            // - application/xml (RFC 7303, previously RFC 3023)
-            // - text/xml (RFC 7303, previously RFC 3023)
-            // https://en.wikipedia.org/wiki/XML_and_MIME
-            "content-type": "application/xml",
-            accept: "application/xml",
-            ...headers,
-        },
+        headers: headers,
         data: reqBody,
     };
+
     // tslint:disable-next-line:no-console
     if (DEBUG) console.error(reqBody);
 
     const res = await axios(req);
+
     // tslint:disable-next-line:no-console
     if (DEBUG) console.error(res.data);
+
     return res;
 }
 

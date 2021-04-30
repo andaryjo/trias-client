@@ -1,4 +1,4 @@
-import { requestAndParse, selectAll, selectOne, getText } from "../request-and-parse";
+import { requestAndParse, selectAll, selectOne, getText } from "../RequestAndParse";
 import { TRIAS_LIR_NAME } from "../xml/TRIAS_LIR_NAME";
 import { TRIAS_LIR_POS } from "../xml/TRIAS_LIR_POS";
 

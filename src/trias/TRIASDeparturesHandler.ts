@@ -1,6 +1,6 @@
 import * as moment from "moment-timezone";
 
-import { requestAndParse, selectAll, selectOne, getText } from "../request-and-parse";
+import { requestAndParse, selectAll, selectOne, getText } from "../RequestAndParse";
 import { TRIAS_SER } from "../xml/TRIAS_SER";
 
 export class TRIASDeparturesHandler {

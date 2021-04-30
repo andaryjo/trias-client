@@ -1,5 +1,5 @@
 import { inspect } from "util";
-import { getClient } from ".";
+import { getClient } from "../lib";
 
 const sbbProfile = {
     // Test environment of SBB

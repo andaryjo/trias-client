@@ -1,7 +1,6 @@
 import * as moment from "moment-timezone";
-import { get } from "lodash";
 
-import { requestAndParse, selectAll, selectOne, getText, DOMElement } from "../request-and-parse";
+import { requestAndParse, selectAll, selectOne, getText, DOMElement } from "../RequestAndParse";
 import { TRIAS_TR } from "../xml/TRIAS_TR";
 
 export class TRIASJourneysHandler {
@@ -34,6 +33,7 @@ export class TRIASJourneysHandler {
             `,
             )
             .join("");
+
         const payload = TRIAS_TR.replace("$ORIGIN", options.origin)
             .replace("$VIA", via)
             .replace("$DESTINATION", options.destination)
@@ -45,10 +45,10 @@ export class TRIASJourneysHandler {
 
         const doc = await requestAndParse(this.url, this.requestorRef, this.headers, payload);
 
-        const trips: Journey[] = [];
+        const trips: FPTFJourney[] = [];
 
         for (const tripEl of selectAll("TripResult", doc)) {
-            const trip: Journey = {
+            const trip: FPTFJourney = {
                 type: "journey",
                 id: "",
                 legs: [],

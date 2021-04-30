@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const {parseResponse} = require('../lib/request-and-parse');
+const { parseResponse } = require("../lib/RequestAndParse");
 
 const docWithTriasNs = `\
 <?xml version="1.0" encoding="UTF-8"?>
@@ -8,20 +8,20 @@ const docWithTriasNs = `\
 	<bar>trias:</bar>
 	<trias:baz>_</trias:baz>
 </Trias>
-`
+`;
 
-describe('parseResponse()', () => {
-	it('should strip trias: namespace from tag names', () => {
+describe("Test parsing", () => {
+	it("Should strip TRIAS namespace", () => {
 		const doc = parseResponse(docWithTriasNs)
-		const triasEl = doc.children.find(c => c.type === 'tag' && c.name === 'Trias')
+		const triasEl = doc.children.find(c => c.type === "tag" && c.name === "Trias")
 
 		const childTags = triasEl.children
-			.filter(c => c.type === 'tag')
+			.filter(c => c.type === "tag")
 			.map(c => c.name);
-		expect(childTags).toEqual(['foo', 'bar', 'baz']) // strips NS from tag names
+		expect(childTags).toEqual(["foo", "bar", "baz"]) // strips NS from tag names
 
-		const barEl = triasEl.children.find(c => c.type === 'tag' && c.name === 'bar')
-		const barText = barEl.children.find(c => c.type === 'text')
-		expect(barText.data).toBe('trias:') // does not strip text content
+		const barEl = triasEl.children.find(c => c.type === "tag" && c.name === "bar")
+		const barText = barEl.children.find(c => c.type === "text")
+		expect(barText.data).toBe("trias:") // does not strip text content
 	});
 });
