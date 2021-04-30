@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+const { isJSDocParameterTag } = require("typescript");
 const trias = require("../lib/index.js");
 
 const creds = process.env.TEST_CREDENTIALS
@@ -16,7 +17,7 @@ describe("Test providers", () => {
             requestorRef: creds["KVV"].token,
             searchName: "karlsruhe",
             journeyOrigin: "de:08212:1103",
-            journeyDestination: "de:08212:90"
+            journeyDestination: "de:08212:89"
         }, {
             name: "VRN",
             url: creds["VRN"].url,
@@ -79,6 +80,22 @@ describe("Test providers", () => {
             expect(journeysResult.journeys.length).toBeGreaterThanOrEqual(1);
             expect(journeysResult.journeys[0].type).toEqual("journey");
 
+            const journey = journeysResult.journeys[0];
+            expect(journey.legs[0].origin.type).toEqual("stop");
+            expect(journey.legs[0].origin.id).toEqual(provider.journeyOrigin);
+            expect(journey.legs[journey.legs.length - 1].destination.type).toEqual("stop");
+            expect(journey.legs[journey.legs.length - 1].destination.id).toEqual(provider.journeyDestination);
+
+            if (provider.via) {
+                let viaIncluded = false;
+                for (const leg of journey.legs) {
+                    if ((leg.origin.type == "stop" && leg.origin.id == provider.via) || (leg.destination.type == "stop" && leg.destination.id == provider.via)) {
+                        viaIncluded = true;
+                    }
+                }
+
+                expect(viaIncluded).toEqual(true);
+            }
         });
     }
 });
