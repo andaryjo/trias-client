@@ -86,16 +86,16 @@ describe("Test providers", () => {
             expect(journey.legs[journey.legs.length - 1].destination.type).toEqual("stop");
             expect(journey.legs[journey.legs.length - 1].destination.id).toEqual(provider.journeyDestination);
 
+            let viaIncluded = false;
             if (provider.via) {
-                let viaIncluded = false;
                 for (const leg of journey.legs) {
                     if ((leg.origin.type == "stop" && leg.origin.id == provider.via) || (leg.destination.type == "stop" && leg.destination.id == provider.via)) {
                         viaIncluded = true;
                     }
                 }
-
-                expect(viaIncluded).toEqual(true);
             }
+
+            expect(viaIncluded).toEqual(provider.via != null);
         });
     }
 });
