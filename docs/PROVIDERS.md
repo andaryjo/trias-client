@@ -25,6 +25,8 @@ Coming soon™.
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips
 - :heavy_check_mark: No contract required
 
+They provide an open API for testing purposes. Use `https://api.opentransportdata.swiss/trias2020` as URL and `57c5dbbbf1fe4d000100001842c323fa9ff44fbba0b9b925f0c052d1` as `Authorization` header.
+
 ### [Verkehrsverbund Bremen & Niedersachsen](https://www.vbn.de/service/entwicklerinfos/)
 
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips

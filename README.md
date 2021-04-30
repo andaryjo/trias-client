@@ -39,7 +39,7 @@ var departuresResult = await client.getDepartures({
 });
 ```
 
-There's also an [example script](example.ts) available that demonstrates how to use `trias-client`.
+There's also an [example script](docs/example.ts) available that demonstrates how to use `trias-client`.
 
 ## What is TRIAS?
 
