@@ -19,24 +19,24 @@ interface StopsResult extends Result {
 }
 
 interface Ticket {
-	id: string;
-	name: string;
-	faresAuthorityRef: string;
-	faresAuthorityName: string;
-	price: number | null;
-	// todo: <NetPrice>
-	currency: string | null;
-	// todo: <VatRate>
-	tariffLevel: string | null;
-	// todo: <TariffLevelLabel>
-	travelClass: string | null; // todo: make an enum
-	// todo: <RequiredCard>
-	validFor: string | null; // todo: make an enum
-	validityDuration: string | null;
-	// todo: <ValidityDurationText>
-	// todo: <ValidityFareZones>
-	// todo: <ValidityAreaText>
-	// todo: <InfoUrl>
-	// todo: <SaleUrl>
-	// todo: <BookingInfo>
+    id: string;
+    name: string;
+    faresAuthorityRef: string;
+    faresAuthorityName: string;
+    price: number | null;
+    // todo: <NetPrice>
+    currency: string | null;
+    // todo: <VatRate>
+    tariffLevel: string | null;
+    // todo: <TariffLevelLabel>
+    travelClass: string | null; // todo: make an enum
+    // todo: <RequiredCard>
+    validFor: string | null; // todo: make an enum
+    validityDuration: string | null;
+    // todo: <ValidityDurationText>
+    // todo: <ValidityFareZones>
+    // todo: <ValidityAreaText>
+    // todo: <InfoUrl>
+    // todo: <SaleUrl>
+    // todo: <BookingInfo>
 }
