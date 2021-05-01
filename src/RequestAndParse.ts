@@ -14,8 +14,8 @@ export async function request(url: string, requestorRef: string, headers: { [key
     // Convert all header keys to lower case, to make sure that you actually overwrite the content-type header when specifying Content-Type
     // HTTP headers are case-insensitive, so this shouldn't be a problem
     for (const header in headers) {
-        if (header == header.toLocaleLowerCase()) continue;
-        headers[header.toLocaleLowerCase()] = headers[header];
+        if (header == header.toLowerCase()) continue;
+        headers[header.toLowerCase()] = headers[header];
         delete headers.header;
     }
 

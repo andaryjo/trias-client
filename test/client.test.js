@@ -19,13 +19,21 @@ describe("Test providers", () => {
             journeyOrigin: "de:08212:1103",
             journeyDestination: "de:08212:89"
         }, {
+            name: "SBB",
+            url: creds["SBB"].url,
+            requestorRef: "trias-client",
+            headers: { "Authorization": creds["SBB"].token },
+            searchName: "messeplatz",
+            journeyOrigin: "8500010", // Basel, Hbf
+            journeyDestination: "8591442" // Zürich, Zoo
+        }, {
             name: "VRN",
             url: creds["VRN"].url,
             requestorRef: creds["VRN"].token,
             searchName: "bismarckplatz",
-            journeyOrigin: "de:08222:2432", // Lange Rötterstraße
-            journeyVia: "de:08221:1146", // Bismarckplatz
-            journeyDestination: "de:08221:1283" // Jägerhaus
+            journeyOrigin: "de:08222:2432", // Mannheim, Lange Rötterstraße
+            journeyVia: "de:08221:1146", // Heidelberg, Bismarckplatz
+            journeyDestination: "de:08221:1283" // Heidelberg, Jägerhaus
         }, {
             name: "VRR",
             url: creds["VRR"].url,
@@ -39,8 +47,8 @@ describe("Test providers", () => {
             requestorRef: creds["VVO"].token,
             headers: { "Content-Type": "text/xml" },
             searchName: "dresden",
-            journeyOrigin: "de:14612:28", // Dresden Hbf
-            journeyDestination: "de:14713:8010205" // Leipzig Hbf
+            journeyOrigin: "de:14612:28", // Dresden, Hbf
+            journeyDestination: "de:14713:8010205" // Leipzig, Hbf
         }
     ]
 
