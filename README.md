@@ -12,7 +12,7 @@ This client aims to be an easy to use and lightweight implementation for the pub
 
 ## Usage
 
-> Please note that you will need an API endpoint and an API key or requestor reference key issued by a data provider. Check the [providers list](https://github.com/andaryjo/trias-client/blob/main/docs/PROVIDERS.md) for open APIs.
+> Please note that you will need an API endpoint and an API key or requestor reference key issued by a data provider. Check the [providers list](docs/PROVIDERS.md) for open APIs.
 
 Install the package:
 
@@ -20,7 +20,7 @@ Install the package:
 npm install trias-client
 ```
 
-Following script creates a client instance, searches for a station and fetches the departures for the first result. Please refer to the [documentation](https://github.com/andaryjo/trias-client/blob/main/docs/README.md) for more information.
+Following script creates a client instance, searches for a station and fetches the departures for the first result. Please refer to the [documentation](docs/README.md) for more information.
 
 ```javascript
 const trias = require("trias-client");
@@ -43,7 +43,7 @@ There's also an [example script](docs/example.ts) available that demonstrates ho
 
 ## What is TRIAS?
 
-TRIAS stands for "**T**ravellor **R**ealtime **I**nformation and **A**dvisory **S**tandard", has been developed in scope of the research and standardisation project for public transport "IP-KOM-ÖV" and was then introduced in 2014 as a standardized specification by the VDV ([Verband Deutscher Verkehrsunternehmen](https://de.wikipedia.org/wiki/Verband_Deutscher_Verkehrsunternehmen)). TRIAS offers a wide-range list of functionalities, including station / location search, realtime departures, navigation, ticket price calculation, malfunction reportings, and so on. [Here](https://github.com/andaryjo/trias-client/blob/main/docs/PROVIDERS.md) is a list of all public transport providers that provide a TRIAS API.
+TRIAS stands for "**T**ravellor **R**ealtime **I**nformation and **A**dvisory **S**tandard", has been developed in scope of the research and standardisation project for public transport "IP-KOM-ÖV" and was then introduced in 2014 as a standardized specification by the VDV ([Verband Deutscher Verkehrsunternehmen](https://de.wikipedia.org/wiki/Verband_Deutscher_Verkehrsunternehmen)). TRIAS offers a wide-range list of functionalities, including station / location search, realtime departures, navigation, ticket price calculation, malfunction reportings, and so on. [Here](docs/PROVIDERS.md) is a list of all public transport providers that provide a TRIAS API.
 
 ## Why TRIAS?
 
