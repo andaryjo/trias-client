@@ -6,7 +6,7 @@ Every function requires defined [options](../src/types/options.ts) and returns d
 
 ## trias.getClient(ClientOptions options)
 
-This function returns a client that you can use to perform requests against a TRIAS API. It requires `ClientOptions` and will return a `TriasClient` instance.
+This function returns a client that you can use to perform requests against a TRIAS API. It requires [`ClientOptions`](..src/types/options.ts#L1) and will return a [`TriasClient`](../src/index.ts#L9) instance.
 
 | Paramater | Description | Type | Required | Default | Example |
 |---|---|---|---|---|---|
@@ -16,7 +16,7 @@ This function returns a client that you can use to perform requests against a TR
 
 ## client.getStops(StopsRequestOptions options)
 
- This function returns a list of stops that fit the given search criteria. It requires `StopsRequestOptions` and will return a Promise which resolves into a `StopsResult`.
+ This function returns a list of stops that fit the given search criteria. It requires [`StopsRequestOptions`](../src/types/options.ts#L23) and will return a Promise which resolves into a [`StopsResult`](..src/types/results.ts#L14).
 
 | Paramater | Description | Type | Required | Default | Example |
 |---|---|---|---|---|---|
@@ -28,7 +28,7 @@ This function returns a client that you can use to perform requests against a TR
 
 ## client.getDepartures(DeparturesRequestOptions options)
 
-This function returns a list of departures and ticker information for a given stop. It requires `DeparturesRequestOptions` and will return a Promise which resolves into a `DeparturesResult`.
+This function returns a list of departures and ticker information for a given stop. It requires [`DeparturesRequestOptions`](../src/types/options.ts#L7) and will return a Promise which resolves into a [`DeparturesResult`](../src/types/results.ts#L5).
 
 | Paramater | Description | Type | Required | Default | Example |
 |---|---|---|---|---|---|
@@ -38,7 +38,7 @@ This function returns a list of departures and ticker information for a given st
 
 ## client.getJourneys(DeparturesRequestOptions options)
 
-This function returns a list of journeys for given origin and destination stops. It requires `JourneysRequestOptions` and will return a Promise which resolves into a `JourneysResult`.
+This function returns a list of journeys for given origin and destination stops. It requires [`JourneysRequestOptions`](../src/types/options.ts#L13) and will return a Promise which resolves into a [`JourneysResult`](../src/types/results.ts#L10).
 
 | Paramater | Description | Type | Required | Default | Example |
 |---|---|---|---|---|---|
