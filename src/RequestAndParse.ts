@@ -11,14 +11,26 @@ const DEBUG = /(^|,)trias-client(,|$)/.test(process.env.DEBUG || "");
 
 export async function request(url: string, requestorRef: string, headers: { [key: string]: string }, reqBody: string): Promise<AxiosResponse<string>> {
 
-    // It is important to keep the functionality to override the Content-Type header. Some APIs do not work with application/xml but only with text/xml
-    // Also, using an accept header does not work for the same reason
-    if (!headers["Content-Type"]) headers["Content-Type"] = "application/xml";
+    // Convert all header keys to lower case, to make sure that you actually overwrite the content-type header when specifying Content-Type
+    // HTTP headers are case-insensitive, so this shouldn't be a problem
+    for (const header in headers) {
+        if (header == header.toLocaleLowerCase()) continue;
+        headers[header.toLocaleLowerCase()] = headers[header];
+        delete headers.header;
+    }
 
     const req: AxiosRequestConfig = {
         url,
         method: "POST",
-        headers: headers,
+        headers: {
+            // There are two MIME assignments for XML data. These are:
+            // - application/xml (RFC 7303, previously RFC 3023)
+            // - text/xml (RFC 7303, previously RFC 3023)
+            // https://en.wikipedia.org/wiki/XML_and_MIME
+            "content-type": "application/xml",
+            "accept": "application/xml",
+            ...headers,
+        },
         data: reqBody,
     };
 
