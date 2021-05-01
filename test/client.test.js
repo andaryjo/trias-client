@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { isJSDocParameterTag } = require("typescript");
+const moment = require("moment-timezone");
 const trias = require("../lib/index.js");
 
 const creds = process.env.TEST_CREDENTIALS
@@ -54,7 +53,7 @@ describe("Test providers", () => {
 
     for (const provider of providers) {
 
-        it("Test for " + provider.name, async () => {
+        it("Test " + provider.name, async () => {
 
             const client = trias.getClient({
                 url: provider.url,
@@ -62,6 +61,7 @@ describe("Test providers", () => {
                 headers: provider.headers
             });
 
+            // Test stop search
             const stopsResult = await client.getStops({
                 name: provider.searchName
             });
@@ -70,23 +70,42 @@ describe("Test providers", () => {
             expect(stopsResult.stops.length).toBeGreaterThanOrEqual(1);
             expect(stopsResult.stops[0].type).toEqual("stop");
 
-            const departuresResult = await client.getDepartures({
+            // Test departures (now)
+            const departuresNowResult = await client.getDepartures({
                 id: stopsResult.stops[0].id
             });
 
-            expect(departuresResult.success).toEqual(true);
-            expect(departuresResult.departures.length).toBeGreaterThanOrEqual(1);
-            expect(departuresResult.departures[0].type).toEqual("stopover");
+            expect(departuresNowResult.success).toEqual(true);
+            expect(departuresNowResult.departures.length).toBeGreaterThanOrEqual(1);
+            expect(departuresNowResult.departures[0].type).toEqual("stopover");
 
+            // Test departures (in 30 mins)
+            const in30Mins = moment().unix() + 30 * 60;
+            const departuresIn30MinsResult = await client.getDepartures({
+                id: stopsResult.stops[0].id,
+                time: moment.unix(in30Mins).format()
+            });
+
+            expect(departuresIn30MinsResult.success).toEqual(true);
+            expect(departuresIn30MinsResult.departures.length).toBeGreaterThanOrEqual(1);
+            expect(departuresIn30MinsResult.departures[0].type).toEqual("stopover");
+
+            let firstDepartureTime = moment(departuresIn30MinsResult.departures[0].departure).unix();
+            if (departuresIn30MinsResult.departures[0].departureDelay) firstDepartureTime += departuresIn30MinsResult.departures[0].departureDelay;
+            expect(firstDepartureTime).toBeGreaterThanOrEqual(in30Mins - 60);
+
+            // Test journeys
             const journeysResult = await client.getJourneys({
                 origin: provider.journeyOrigin,
                 destination: provider.journeyDestination,
-                via: provider.journeyVia ? [provider.journeyVia] : []
+                via: provider.journeyVia ? [provider.journeyVia] : [],
+                includeFares: true
             });
 
             expect(journeysResult.success).toEqual(true);
             expect(journeysResult.journeys.length).toBeGreaterThanOrEqual(1);
             expect(journeysResult.journeys[0].type).toEqual("journey");
+            expect(journeysResult.journeys[0]).toHaveProperty("tickets");
 
             const journey = journeysResult.journeys[0];
             expect(journey.legs[0].origin.type).toEqual("stop");
@@ -104,6 +123,7 @@ describe("Test providers", () => {
             }
 
             expect(viaIncluded).toEqual(provider.via != null);
+            
         });
     }
 });
