@@ -2,7 +2,7 @@
 
 This Node.js module is written using TypeScript and therefore comes with easy to use type specifications you can have a look at in the [`types`](../src/types) directory.
 
-Every function requires defined [options](../src/types/options.ts) and returns defined [results](../src/types/results.ts), which then include [Friendly Public Transport Format](../src/types/fptf.ts) elements. As of now, the FPTF does not fully support all TRIAS functionalities, so be aware that there are some [slight differences](../main/src/types/fptf.ts).
+Every function requires defined [options](../src/types/options.ts) and returns defined [results](../src/types/results.ts), which then include [Friendly Public Transport Format](https://github.com/public-transport/friendly-public-transport-format) elements. As of now, the FPTF does not fully support all TRIAS functionalities, so be aware that there are some [slight differences](../src/types/fptf.ts).
 
 ## trias.getClient(ClientOptions options)
 
