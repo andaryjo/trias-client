@@ -94,7 +94,7 @@ export class TRIASDeparturesHandler {
         };
     }
 
-    parseResponseTime(time: string) {
+    parseResponseTime(time: string) : string {
         return moment(time).tz("Europe/Berlin").format();
     }
 }

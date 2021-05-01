@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const moment = require("moment-timezone");
 const trias = require("../lib/index.js");
 
