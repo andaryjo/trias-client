@@ -11,6 +11,7 @@ export const TRIAS_TR = `
                     </LocationRef>
                     $DEPTIME
                 </Origin>
+                $VIA
                 <Destination>
                     <LocationRef>
                         <StopPointRef>$DESTINATION</StopPointRef>
@@ -19,10 +20,10 @@ export const TRIAS_TR = `
                 </Destination>
                 <Params>
                     <IncludeTurnDescription>false</IncludeTurnDescription>
-                    <IncludeTrackSections>true</IncludeTrackSections>
+                    <IncludeTrackSections>false</IncludeTrackSections>
                     <IncludeLegProjection>false</IncludeLegProjection>
                     <IncludeIntermediateStops>false</IncludeIntermediateStops>
-                    <IncludeFares>false</IncludeFares>
+                    <IncludeFares>$INCLUDE_FARES</IncludeFares>
                     <NumberOfResults>$MAXRESULTS</NumberOfResults>
                 </Params>
             </TripRequest>

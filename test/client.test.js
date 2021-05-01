@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { isJSDocParameterTag } = require("typescript");
 const trias = require("../lib/index.js");
 
-if (process.env.TEST_CREDENTIALS) var creds = JSON.parse(process.env.TEST_CREDENTIALS);
-else var creds = require("./test-credentials.json");
+const creds = process.env.TEST_CREDENTIALS
+    ? JSON.parse(process.env.TEST_CREDENTIALS)
+    : require("./test-credentials.json");
 
 describe("Test providers", () => {
 
@@ -14,14 +17,23 @@ describe("Test providers", () => {
             requestorRef: creds["KVV"].token,
             searchName: "karlsruhe",
             journeyOrigin: "de:08212:1103",
-            journeyDestination: "de:08212:90"
+            journeyDestination: "de:08212:89"
+        }, {
+            name: "SBB",
+            url: creds["SBB"].url,
+            requestorRef: "trias-client",
+            headers: { "Authorization": creds["SBB"].token },
+            searchName: "messeplatz",
+            journeyOrigin: "8500010", // Basel, Hbf
+            journeyDestination: "8591442" // Zürich, Zoo
         }, {
             name: "VRN",
             url: creds["VRN"].url,
             requestorRef: creds["VRN"].token,
             searchName: "bismarckplatz",
-            journeyOrigin: "de:08222:2417",
-            journeyDestination: "de:08221:1146"
+            journeyOrigin: "de:08222:2432", // Mannheim, Lange Rötterstraße
+            journeyVia: "de:08221:1146", // Heidelberg, Bismarckplatz
+            journeyDestination: "de:08221:1283" // Heidelberg, Jägerhaus
         }, {
             name: "VRR",
             url: creds["VRR"].url,
@@ -35,8 +47,8 @@ describe("Test providers", () => {
             requestorRef: creds["VVO"].token,
             headers: { "Content-Type": "text/xml" },
             searchName: "dresden",
-            journeyOrigin: "de:14612:28",
-            journeyDestination: "de:14713:8010205"
+            journeyOrigin: "de:14612:28", // Dresden, Hbf
+            journeyDestination: "de:14713:8010205" // Leipzig, Hbf
         }
     ]
 
@@ -68,13 +80,30 @@ describe("Test providers", () => {
 
             const journeysResult = await client.getJourneys({
                 origin: provider.journeyOrigin,
-                destination: provider.journeyDestination
+                destination: provider.journeyDestination,
+                via: provider.journeyVia ? [provider.journeyVia] : []
             });
 
             expect(journeysResult.success).toEqual(true);
             expect(journeysResult.journeys.length).toBeGreaterThanOrEqual(1);
             expect(journeysResult.journeys[0].type).toEqual("journey");
 
+            const journey = journeysResult.journeys[0];
+            expect(journey.legs[0].origin.type).toEqual("stop");
+            expect(journey.legs[0].origin.id).toEqual(provider.journeyOrigin);
+            expect(journey.legs[journey.legs.length - 1].destination.type).toEqual("stop");
+            expect(journey.legs[journey.legs.length - 1].destination.id).toEqual(provider.journeyDestination);
+
+            let viaIncluded = false;
+            if (provider.via) {
+                for (const leg of journey.legs) {
+                    if ((leg.origin.type == "stop" && leg.origin.id == provider.via) || (leg.destination.type == "stop" && leg.destination.id == provider.via)) {
+                        viaIncluded = true;
+                    }
+                }
+            }
+
+            expect(viaIncluded).toEqual(provider.via != null);
         });
     }
 });

@@ -14,3 +14,4 @@ interface JourneysResult extends Result {
 interface StopsResult extends Result {
     stops?: FPTFStop[];
 }
+
