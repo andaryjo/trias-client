@@ -6,6 +6,10 @@ This is a list of public transport providers that provide a TRIAS API. Be aware 
 - All providers prohibit automated mass requests and enforce some other legalse, e.g. legal disclaimers in your app. Make sure to check their usage agreements.
 
 
+### [Bayerische Eisenbahngesellschaft (DEFAS)](https://www.bayern-fahrplan.de/de/faq/hintergrundinfos)
+
+Not intended for public use.
+
 ### [Karlsruher Verkehrsverbund](https://www.kvv.de/fahrplan/fahrplaene/open-data.html)
 
 - :heavy_check_mark: Supports Location Information, Stop Events and Trips
