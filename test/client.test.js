@@ -42,6 +42,13 @@ describe("Test providers", () => {
             journeyOrigin: "de:05314:63101",
             journeyDestination: "de:05382:55101"
         }, {
+            name: "VST",
+            url: creds["VST"].url,
+            requestorRef: creds["VST"].token,
+            searchName: "villach",
+            journeyOrigin: "at:42:3654", // Villach, Hbf
+            journeyDestination: "at:42:3642" // Klagenfurt, Hbf
+        }, {
             name: "VVO",
             url: creds["VVO"].url,
             requestorRef: creds["VVO"].token,
