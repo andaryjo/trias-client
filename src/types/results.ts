@@ -4,11 +4,12 @@ interface Result {
 
 interface DeparturesResult extends Result {
     departures?: FPTFStopover[];
-    ticker?: string[];
+    situations?: Situation[];
 }
 
 interface JourneysResult extends Result {
     journeys?: FPTFJourney[];
+    situations?: Situation[];
 }
 
 interface StopsResult extends Result {

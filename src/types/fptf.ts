@@ -48,7 +48,7 @@ interface FPTFJourney {
     type: string;
     id: string;
     legs: FPTFLeg[];
-    tickets?: FPTFTicket[]; // Not included in FPTF
+    tickets?: Ticket[]; // Not included in FPTF
 }
 
 interface FPTFLeg {
@@ -88,7 +88,7 @@ const enum FPTFSubmode {
 }
 
 // Not included in FPTF
-interface FPTFTicket {
+interface Ticket {
     id: string;
     name: string;
     faresAuthorityRef: string;
@@ -109,4 +109,12 @@ interface FPTFTicket {
     // todo: <InfoUrl>
     // todo: <SaleUrl>
     // todo: <BookingInfo>
+}
+
+interface Situation {
+    title: string,
+    description: string;
+    validFrom: string;
+    validTo: string;
+    priority: string;
 }

@@ -1,4 +1,5 @@
 import * as moment from "moment-timezone";
+import { resourceLimits } from "node:worker_threads";
 
 import { requestAndParse, selectAll, selectOne, getText, DOMElement } from "../RequestAndParse";
 import { TRIAS_TR } from "../xml/TRIAS_TR";
@@ -36,7 +37,29 @@ export class TRIASJourneysHandler {
 
         const doc = await requestAndParse(this.url, this.requestorRef, this.headers, payload);
 
+        const situations: Situation[] = [];
         const trips: FPTFJourney[] = [];
+
+        if (options.includeSituations) {
+            for (const situationEl of selectAll("PtSituation", doc)) {
+
+                const summary = getText(selectOne("Summary", situationEl));
+                const detail = getText(selectOne("Detail", situationEl));
+                const startTime = getText(selectOne("StartTime", situationEl));
+                const endTime = getText(selectOne("EndTime", situationEl));
+                const priority = getText(selectOne("Priority", situationEl));
+
+                const situation: Situation = {
+                    title: summary || "",
+                    description: detail || "",
+                    validFrom: startTime || "",
+                    validTo: endTime || "",
+                    priority: priority || ""
+                }
+
+                situations.push(situation);
+            }
+        }
 
         for (const tripEl of selectAll("TripResult", doc)) {
             const trip: FPTFJourney = {
@@ -204,31 +227,34 @@ export class TRIASJourneysHandler {
             trips.push(trip);
         }
 
-        return {
+        const result: JourneysResult = {
             success: true,
             journeys: trips,
-        };
+        }
+        if (options.includeSituations) result.situations = situations;
+
+        return result;
     }
 
-    parseStationID(id: string) : string {
+    parseStationID(id: string): string {
         if (!id.includes(":")) return id;
         const t = id.split(":");
         return t[0] + ":" + t[1] + ":" + t[2];
     }
 
-    parseRequestViaStation(stationID: string) : string {
+    parseRequestViaStation(stationID: string): string {
         return "<Via><ViaPoint><StopPointRef>" + stationID + "</StopPointRef></ViaPoint></Via>";
     }
 
-    parseRequestTime(time: string) : string {
+    parseRequestTime(time: string): string {
         return "<DepArrTime>" + moment(time).tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss") + "</DepArrTime>";
     }
 
-    parseResponseTime(time: string) : string{
+    parseResponseTime(time: string): string {
         return moment(time).tz("Europe/Berlin").format();
     }
 
-    parseResponseTicket(ticketEl: DOMElement): FPTFTicket | null {
+    parseResponseTicket(ticketEl: DOMElement): Ticket | null {
         const id = getText(selectOne("TicketId", ticketEl));
         const name = getText(selectOne("TicketName", ticketEl));
         const faresAuthorityRef = getText(selectOne("FaresAuthorityRef", ticketEl));

@@ -25,17 +25,28 @@ export class TRIASDeparturesHandler {
 
         const doc = await requestAndParse(this.url, this.requestorRef, this.headers, payload);
 
-        const ticker = [];
+        const situations: Situation[] = [];
         const departures: FPTFStopover[] = [];
 
-        for (const situationEl of selectAll("PtSituation", doc)) {
-            const summary = getText(selectOne("Summary", situationEl));
-            if (!summary) continue;
-            const startTime = getText(selectOne("StartTime", situationEl));
-            const endTime = getText(selectOne("EndTime", situationEl));
+        if (options.includeSituations) {
+            for (const situationEl of selectAll("PtSituation", doc)) {
 
-            const now = moment().unix();
-            if (now > moment(startTime).unix() && now < moment(endTime).unix()) ticker.push(summary);
+                const summary = getText(selectOne("Summary", situationEl));
+                const detail = getText(selectOne("Detail", situationEl));
+                const startTime = getText(selectOne("StartTime", situationEl));
+                const endTime = getText(selectOne("EndTime", situationEl));
+                const priority = getText(selectOne("Priority", situationEl));
+
+                const situation: Situation = {
+                    title: summary || "",
+                    description: detail || "",
+                    validFrom: startTime || "",
+                    validTo: endTime || "",
+                    priority: priority || ""
+                }
+
+                situations.push(situation);
+            }
         }
 
         for (const departureEl of selectAll("StopEvent", doc)) {
@@ -87,14 +98,16 @@ export class TRIASDeparturesHandler {
             departures.push(departure);
         }
 
-        return {
+        const result: DeparturesResult = {
             success: true,
             departures,
-            ticker,
-        };
+        }
+        if (options.includeSituations) result.situations = situations;
+
+        return result;
     }
 
-    parseResponseTime(time: string) : string {
+    parseResponseTime(time: string): string {
         return moment(time).tz("Europe/Berlin").format();
     }
 }
