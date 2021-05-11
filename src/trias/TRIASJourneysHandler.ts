@@ -210,25 +210,25 @@ export class TRIASJourneysHandler {
         };
     }
 
-    parseStationID(id: string) : string {
+    parseStationID(id: string): string {
         if (!id.includes(":")) return id;
         const t = id.split(":");
         return t[0] + ":" + t[1] + ":" + t[2];
     }
 
-    parseRequestViaStation(stationID: string) : string {
+    parseRequestViaStation(stationID: string): string {
         return "<Via><ViaPoint><StopPointRef>" + stationID + "</StopPointRef></ViaPoint></Via>";
     }
 
-    parseRequestTime(time: string) : string {
+    parseRequestTime(time: string): string {
         return "<DepArrTime>" + moment(time).tz("Europe/Berlin").format("YYYY-MM-DDTHH:mm:ss") + "</DepArrTime>";
     }
 
-    parseResponseTime(time: string) : string{
+    parseResponseTime(time: string): string {
         return moment(time).tz("Europe/Berlin").format();
     }
 
-    parseResponseTicket(ticketEl: DOMElement): FPTFTicket | null {
+    parseResponseTicket(ticketEl: DOMElement): Ticket | null {
         const id = getText(selectOne("TicketId", ticketEl));
         const name = getText(selectOne("TicketName", ticketEl));
         const faresAuthorityRef = getText(selectOne("FaresAuthorityRef", ticketEl));

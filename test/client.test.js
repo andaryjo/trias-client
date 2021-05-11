@@ -80,8 +80,12 @@ describe("Test providers", () => {
 
             // Test departures (now)
             const departuresNowResult = await client.getDepartures({
-                id: stopsResult.stops[0].id
+                id: stopsResult.stops[0].id,
             });
+
+            if (provider.name == "VRN") {
+                console.log(JSON.stringify(departuresNowResult));
+            }
 
             expect(departuresNowResult.success).toEqual(true);
             expect(departuresNowResult.departures.length).toBeGreaterThanOrEqual(1);
@@ -131,7 +135,7 @@ describe("Test providers", () => {
             }
 
             expect(viaIncluded).toEqual(provider.via != null);
-            
+
         });
     }
 });
