@@ -25,6 +25,7 @@ This function returns a client that you can use to perform requests against a TR
 | longitude | Longitude for location search. Required when no name is provided. | number | no | none | `8.6931989` |
 | radius | Radius for location search. | number | no | `500` | `1000` |
 | maxResults | Maximum amount of results. | number | no | `10` | `15` |
+| includeSituations | Whether you want to retrieve situations. | boolean | no |`false` | `false` |
 
 ## client.getDepartures(DeparturesRequestOptions options)
 
@@ -49,3 +50,4 @@ This function returns a list of journeys for given origin and destination stops.
 | departureTime | Desired time of departure as ISO 8601. Only considered if arrival time is not set. | string | no | now | `"2021-03-24T23:08:00+01:00` |
 | maxResults | Maximum amount of results. | number | no | `5` | `15` |
 | includeFares | Whether you want to retrieve fares. | boolean | no |`false` | `false` |
+| includeSituations | Whether you want to retrieve situations. | boolean | no |`false` | `false` |
