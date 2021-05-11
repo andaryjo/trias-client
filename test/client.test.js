@@ -81,13 +81,11 @@ describe("Test providers", () => {
             // Test departures (now)
             const departuresNowResult = await client.getDepartures({
                 id: stopsResult.stops[0].id,
+                includeSituations: true
             });
 
-            if (provider.name == "VRN") {
-                console.log(JSON.stringify(departuresNowResult));
-            }
-
             expect(departuresNowResult.success).toEqual(true);
+            expect(departuresNowResult.situations.length).toBeGreaterThanOrEqual(0);
             expect(departuresNowResult.departures.length).toBeGreaterThanOrEqual(1);
             expect(departuresNowResult.departures[0].type).toEqual("stopover");
 
@@ -111,10 +109,12 @@ describe("Test providers", () => {
                 origin: provider.journeyOrigin,
                 destination: provider.journeyDestination,
                 via: provider.journeyVia ? [provider.journeyVia] : [],
-                includeFares: true
+                includeFares: true,
+                includeSituations: true
             });
 
             expect(journeysResult.success).toEqual(true);
+            expect(journeysResult.situations.length).toBeGreaterThanOrEqual(0);
             expect(journeysResult.journeys.length).toBeGreaterThanOrEqual(1);
             expect(journeysResult.journeys[0].type).toEqual("journey");
             expect(journeysResult.journeys[0]).toHaveProperty("tickets");

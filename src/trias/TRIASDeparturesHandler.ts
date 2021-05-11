@@ -28,23 +28,25 @@ export class TRIASDeparturesHandler {
         const situations: Situation[] = [];
         const departures: FPTFStopover[] = [];
 
-        for (const situationEl of selectAll("PtSituation", doc)) {
+        if (options.includeSituations) {
+            for (const situationEl of selectAll("PtSituation", doc)) {
 
-            const summary = getText(selectOne("Summary", situationEl));
-            const detail = getText(selectOne("Detail", situationEl));
-            const startTime = getText(selectOne("StartTime", situationEl));
-            const endTime = getText(selectOne("EndTime", situationEl));
-            const priority = getText(selectOne("Priority", situationEl));
+                const summary = getText(selectOne("Summary", situationEl));
+                const detail = getText(selectOne("Detail", situationEl));
+                const startTime = getText(selectOne("StartTime", situationEl));
+                const endTime = getText(selectOne("EndTime", situationEl));
+                const priority = getText(selectOne("Priority", situationEl));
 
-            const situation: Situation = {
-                title: summary || "",
-                description: detail || "",
-                validFrom: startTime || "",
-                validTo: endTime || "",
-                priority: priority || ""
+                const situation: Situation = {
+                    title: summary || "",
+                    description: detail || "",
+                    validFrom: startTime || "",
+                    validTo: endTime || "",
+                    priority: priority || ""
+                }
+
+                situations.push(situation);
             }
-
-            situations.push(situation);
         }
 
         for (const departureEl of selectAll("StopEvent", doc)) {
@@ -96,11 +98,13 @@ export class TRIASDeparturesHandler {
             departures.push(departure);
         }
 
-        return {
+        const result: DeparturesResult = {
             success: true,
             departures,
-            situations,
-        };
+        }
+        if (options.includeSituations) result.situations = situations;
+
+        return result;
     }
 
     parseResponseTime(time: string): string {

@@ -8,6 +8,7 @@ interface DeparturesRequestOptions {
     id: string;
     time?: string;
     maxResults?: number;
+    includeSituations?: boolean;
 }
 
 interface JourneyRequestOptions {
@@ -18,6 +19,7 @@ interface JourneyRequestOptions {
     arrivalTime?: string;
     maxResults?: number;
     includeFares?: boolean;
+    includeSituations?: boolean;
 }
 
 interface StopsRequestOptions {
