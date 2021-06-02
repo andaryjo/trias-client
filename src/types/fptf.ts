@@ -52,15 +52,18 @@ interface FPTFJourney {
 }
 
 interface FPTFLeg {
+    tripId?: string; // Not included in FPTF
     line?: FPTFLine; // Not included in FPTF
     mode: FPTFMode;
     subMode?: FPTFSubmode;
     direction: string; // Not included in FPTF
     origin: string | FPTFStop | FPTFLocation;
     destination: string | FPTFStop | FPTFLocation;
+    plannedDeparture?: string; // Not included in FPTF
     departure: string;
     departureDelay?: number;
     departurePlatform?: string;
+    plannedArrival?: string; // Not included in FPTF
     arrival: string;
     arrivalDelay?: number;
     arrivalPlatform?: string;
