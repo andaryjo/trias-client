@@ -25,7 +25,6 @@ This function returns a client that you can use to perform requests against a TR
 | longitude | Longitude for location search. Required when no name is provided. | number | no | none | `8.6931989` |
 | radius | Radius for location search. | number | no | `500` | `1000` |
 | maxResults | Maximum amount of results. | number | no | `10` | `15` |
-| includeSituations | Whether you want to retrieve situations. | boolean | no |`false` | `false` |
 
 ## client.getDepartures(DeparturesRequestOptions options)
 
@@ -36,6 +35,7 @@ This function returns a list of departures and ticker information for a given st
 | id | ID of the stop. | string | yes | none | `"de:08222:2417"` |
 | time | Requested time for departures as ISO 8601. | string | no | now | `"2021-03-24T21:14:00+01:00` |
 | maxResults | Maximum amount of results. | number | no | `25` | `15` |
+| includeSituations | Whether you want to retrieve situations. | boolean | no |`false` | `false` |
 
 ## client.getJourneys(DeparturesRequestOptions options)
 
