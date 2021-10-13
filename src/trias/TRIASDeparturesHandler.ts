@@ -71,6 +71,7 @@ export class TRIASDeparturesHandler {
             const direction = getText(selectOne("DestinationText Text", departureEl));
             if (direction) departure.direction = direction;
 
+            // todo: planned*
             const timetabledTime = getText(selectOne("TimetabledTime", departureEl));
             if (timetabledTime) departure.departure = this.parseResponseTime(timetabledTime);
 
