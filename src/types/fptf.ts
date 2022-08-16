@@ -112,7 +112,7 @@ interface Ticket {
 }
 
 interface Situation {
-    title: string,
+    title: string;
     description: string;
     validFrom: string;
     validTo: string;

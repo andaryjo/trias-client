@@ -23,8 +23,7 @@ export class TRIASJourneysHandler {
         if (options.arrivalTime) arrTime = this.parseRequestTime(options.arrivalTime);
         else if (options.departureTime) depTime = this.parseRequestTime(options.departureTime);
 
-        const via = (options.via || [])
-            .map((stationID) => this.parseRequestViaStation(stationID)).join("");
+        const via = (options.via || []).map((stationID) => this.parseRequestViaStation(stationID)).join("");
 
         const payload = TRIAS_TR.replace("$ORIGIN", options.origin)
             .replace("$VIA", via)
@@ -42,7 +41,6 @@ export class TRIASJourneysHandler {
 
         if (options.includeSituations) {
             for (const situationEl of selectAll("PtSituation", doc)) {
-
                 const summary = getText(selectOne("Summary", situationEl));
                 const detail = getText(selectOne("Detail", situationEl));
                 const startTime = getText(selectOne("StartTime", situationEl));
@@ -54,8 +52,8 @@ export class TRIASJourneysHandler {
                     description: detail || "",
                     validFrom: startTime || "",
                     validTo: endTime || "",
-                    priority: priority || ""
-                }
+                    priority: priority || "",
+                };
 
                 situations.push(situation);
             }
@@ -230,7 +228,7 @@ export class TRIASJourneysHandler {
         const result: JourneysResult = {
             success: true,
             journeys: trips,
-        }
+        };
         if (options.includeSituations) result.situations = situations;
 
         return result;

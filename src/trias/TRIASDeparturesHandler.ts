@@ -30,7 +30,6 @@ export class TRIASDeparturesHandler {
 
         if (options.includeSituations) {
             for (const situationEl of selectAll("PtSituation", doc)) {
-
                 const summary = getText(selectOne("Summary", situationEl));
                 const detail = getText(selectOne("Detail", situationEl));
                 const startTime = getText(selectOne("StartTime", situationEl));
@@ -42,8 +41,8 @@ export class TRIASDeparturesHandler {
                     description: detail || "",
                     validFrom: startTime || "",
                     validTo: endTime || "",
-                    priority: priority || ""
-                }
+                    priority: priority || "",
+                };
 
                 situations.push(situation);
             }
@@ -101,7 +100,7 @@ export class TRIASDeparturesHandler {
         const result: DeparturesResult = {
             success: true,
             departures,
-        }
+        };
         if (options.includeSituations) result.situations = situations;
 
         return result;
