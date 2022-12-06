@@ -55,12 +55,10 @@ And this is where TRIAS becomes relevant, as the APIs built on it are public (no
 
 ## Related resources
 
-`trias-client` was originally developed in scope of [Abfahrt, a public transport companion](https://about.abfahrt.app) that integrates multiple ÖPNV providers in just one app. You can take a look over there to see this client in action.
+`trias-client` was originally developed in scope of Abfahrt, a public transport companion (retired as of December 2022) that integrates multiple ÖPNV providers in just one app. You can take a look over there to see this client in action.
 
 Dou you want to develop your own TRIAS client? Here are some resources:
 - [VDV 431-2 EKAP-Schnittstellenbeschreibung (german)](https://www.vdv.de/ip-kom-oev.aspx)
 - [VDV TRIAS XML specification](https://github.com/VDVde/TRIAS)
 - [TRIAS implementation example in PHP](https://www.vrn.de/opendata/node/118)
 - [TRIAS request examples (german)](https://www.verbundlinie.at/fahrplan/rund-um-den-fahrplan/link-zum-fahrplan)
-
-**Made with :two_hearts: in Heidelberg.**
