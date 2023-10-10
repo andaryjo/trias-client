@@ -23,8 +23,7 @@ export class TRIASJourneysHandler {
         if (options.arrivalTime) arrTime = this.parseRequestTime(options.arrivalTime);
         else if (options.departureTime) depTime = this.parseRequestTime(options.departureTime);
 
-        const via = (options.via || [])
-            .map((stationID) => this.parseRequestViaStation(stationID)).join("");
+        const via = (options.via || []).map((stationID) => this.parseRequestViaStation(stationID)).join("");
 
         const payload = TRIAS_TR.replace("$ORIGIN", options.origin)
             .replace("$VIA", via)
@@ -42,7 +41,6 @@ export class TRIASJourneysHandler {
 
         if (options.includeSituations) {
             for (const situationEl of selectAll("PtSituation", doc)) {
-
                 const summary = getText(selectOne("Summary", situationEl));
                 const detail = getText(selectOne("Detail", situationEl));
                 const startTime = getText(selectOne("StartTime", situationEl));
@@ -54,8 +52,8 @@ export class TRIASJourneysHandler {
                     description: detail || "",
                     validFrom: startTime || "",
                     validTo: endTime || "",
-                    priority: priority || ""
-                }
+                    priority: priority || "",
+                };
 
                 situations.push(situation);
             }
@@ -97,10 +95,13 @@ export class TRIASJourneysHandler {
                     if (startStationName) origin.name = startStationName;
 
                     const startTime = getText(selectOne("TimetabledTime", legBoardEl));
-                    if (startTime) leg.departure = this.parseResponseTime(startTime);
+                    if (startTime) leg.departure = leg.plannedDeparture = this.parseResponseTime(startTime);
 
                     const startRealtime = getText(selectOne("EstimatedTime", legBoardEl));
-                    if (startRealtime) leg.departureDelay = moment(startRealtime).unix() - moment(leg.departure).unix();
+                    if (startRealtime) {
+                        leg.departure = this.parseResponseTime(startRealtime);
+                        leg.departureDelay = moment(leg.departure).unix() - moment(leg.plannedDeparture).unix();
+                    }
 
                     const startPlatform = getText(selectOne("PlannedBay Text", legBoardEl));
                     if (startPlatform) leg.departurePlatform = startPlatform;
@@ -120,10 +121,13 @@ export class TRIASJourneysHandler {
                     if (endStationName) destination.name = endStationName;
 
                     const endTime = getText(selectOne("TimetabledTime", legAlightEl));
-                    if (endTime) leg.arrival = this.parseResponseTime(endTime);
+                    if (endTime) leg.arrival = leg.plannedArrival = this.parseResponseTime(endTime);
 
                     const endRealtime = getText(selectOne("EstimatedTime", legAlightEl));
-                    if (endRealtime) leg.arrivalDelay = moment(endRealtime).unix() - moment(leg.arrival).unix();
+                    if (endRealtime) {
+                        leg.arrival = this.parseResponseTime(endRealtime);
+                        leg.arrivalDelay = moment(leg.arrival).unix() - moment(leg.plannedArrival).unix();
+                    }
 
                     const endPlatform = getText(selectOne("PlannedBay Text", legAlightEl));
                     if (endPlatform) leg.arrivalPlatform = endPlatform;
@@ -134,11 +138,13 @@ export class TRIASJourneysHandler {
                         line: "",
                     };
 
-                    const lineName = getText(selectOne("PublishedLineName Text", legEl)) || getText(selectOne("Name Text", legEl));
-                    if (lineName && leg.line) {
-                        leg.line.id = lineName;
-                        leg.line.line = lineName;
-                    }
+                    const tripId = getText(selectOne("JourneyRef", legEl));
+                    if (tripId) leg.tripId = tripId;
+
+                    const lineId = getText(selectOne("LineRef", legEl));
+                    if (lineId && leg.line) leg.line.id = lineId;
+                    const lineName = getText(selectOne("PublishedLineName Text", legEl));
+                    if (lineName && leg.line) leg.line.line = lineName;
 
                     const direction = getText(selectOne("DestinationText Text", legEl));
                     if (direction) leg.direction = direction;
@@ -230,7 +236,7 @@ export class TRIASJourneysHandler {
         const result: JourneysResult = {
             success: true,
             journeys: trips,
-        }
+        };
         if (options.includeSituations) result.situations = situations;
 
         return result;

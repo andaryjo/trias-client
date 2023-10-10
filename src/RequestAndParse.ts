@@ -10,7 +10,6 @@ export { Element as DOMElement } from "domhandler";
 const DEBUG = /(^|,)trias-client(,|$)/.test(process.env.DEBUG || "");
 
 export async function request(url: string, requestorRef: string, headers: { [key: string]: string }, reqBody: string): Promise<AxiosResponse<string>> {
-
     // Convert all header keys to lower case, to make sure that you actually overwrite the content-type header when specifying Content-Type
     // HTTP headers are case-insensitive, so this shouldn't be a problem
     for (const header in headers) {
@@ -28,7 +27,7 @@ export async function request(url: string, requestorRef: string, headers: { [key
             // - text/xml (RFC 7303, previously RFC 3023)
             // https://en.wikipedia.org/wiki/XML_and_MIME
             "content-type": "application/xml",
-            "accept": "application/xml",
+            accept: "application/xml",
             ...headers,
         },
         data: reqBody,
